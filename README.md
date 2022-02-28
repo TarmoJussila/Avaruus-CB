@@ -1,5 +1,4 @@
-----------------------------------------------------------------
-AVARUUS - VERSION 1.3
+AVARUUS
 ----------------------------------------------------------------
 
 AVARUUS is an old school local multiplayer space shooter game.
@@ -7,7 +6,6 @@ Defeat your opponents with various weapons, tools and other
 items and survive as the last man standing to win.
 Get ready for a blast from the past!
 
-----------------------------------------------------------------
 HOW TO PLAY
 ----------------------------------------------------------------
 
@@ -24,7 +22,6 @@ The last man standing will win the round. The player with most
 round victories will win the match and claim the fame on the
 top list.
 
-----------------------------------------------------------------
 CONTROLS
 ----------------------------------------------------------------
 
@@ -34,7 +31,6 @@ controls can be configured in the settings menu.
 The game supports Xbox 360 controllers only. Consider using a
 controller emulator for non-supported gamepads.
 
-----------------------------------------------------------------
 DEVELOPMENT
 ----------------------------------------------------------------
 
@@ -50,7 +46,6 @@ The game was developed with experimental CoolBasic game engine
 which was already outdated technology-wise when the development
 of AVARUUS began.
 
-----------------------------------------------------------------
 PERFORMANCE
 ----------------------------------------------------------------
 
@@ -61,10 +56,10 @@ performance on operating systems released after Windows XP.
 - Recommended OS: Windows XP (or newer)
 - Minimum OS: Windows 98
 
-----------------------------------------------------------------
 COMMAND LINE OPTIONS
 ----------------------------------------------------------------
 
+```
 'LAUNCH' = Skip launcher at start
 'RATIO' = Enable all launcher aspect ratios
 'XXX,XXX' = Set custom resolution
@@ -73,14 +68,13 @@ COMMAND LINE OPTIONS
 'EXC' = Set exclusive fullscreen mode
 'FPS' = Show frames per second
 'TRACK' = Hide track names
+```
 
-----------------------------------------------------------------
 CREDITS
 ----------------------------------------------------------------
 
 Code + Graphics = Tarmo Jussila
+
 Music + Sounds = Juhani Haverinen
 
 See the LICENSE file for more information.
-
-----------------------------------------------------------------
