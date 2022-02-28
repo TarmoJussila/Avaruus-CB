@@ -1,5 +1,4 @@
-AVARUUS
-----------------------------------------------------------------
+# AVARUUS
 
 AVARUUS is an old school local multiplayer space shooter game.
 Defeat your opponents with various weapons, tools and other
