@@ -1,0 +1,23 @@
+----------------------------------------------------------------
+AVARUUS - LICENSE
+----------------------------------------------------------------
+
+Copyright (c) 2006-2018 Tarmo Jussila
+
+This work is licensed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License.
+http://creativecommons.org/licenses/by-nc-sa/4.0/
+
+The copyright for the music belongs to Juhani Haverinen.
+
+----------------------------------------------------------------
+THIRD PARTY LICENSE INFORMATION
+----------------------------------------------------------------
+
+- This project is distributed with a DirectDraw wrapper file
+  created by Dege. More information: http://dege.fw.hu/
+
+- This project uses a gamepad input library created by a
+  CoolBasic forum user named Marcoder.
+
+----------------------------------------------------------------

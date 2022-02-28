@@ -1,0 +1,38 @@
+### Windows ###
+# Thumbnails
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Configs
+[Dd]esktop.ini
+
+# Recycle Bin
+$RECYCLE.BIN/
+
+# Installers
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Executables
+*.exe
+
+# Archives
+*.rar
+*.zip
+
+# Shortcuts
+*.lnk
+
+# Logs
+*.log
+
+### AVARUUS ###
+# Save Data
+Data/Launcher.dat
+Data/Multiplayer.dat
+Data/Settings.dat
+Data/Statistics.dat
