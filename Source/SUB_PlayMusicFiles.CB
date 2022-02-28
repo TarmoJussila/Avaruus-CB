@@ -1,0 +1,97 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - PlayMusicFiles
+// =====================================================================================================================================================================================================
+PlayMusicFiles:
+    
+    // If music files exist then play them randomly.
+    If musicFileCount > 0
+        
+        // If music file is not playing, randomly pick a file to play.
+        If SoundPlaying(music)=OFF And musicEnabled=True Then
+        
+            trackNameTimer=Timer() // Zero the track name timer = show the new track name.
+            previousTrack=trackIndex // Before randomizing new track, check the previous one.
+            trackIndex=Rand(1, musicFileCount) // Ramdomly pick which music file to play.
+            // Compare indexes. Don't play the same track twice in a row.
+            If trackIndex = previousTrack And trackIndex < musicFileCount
+                trackIndex + 1 // If it's the same, skip to next one.
+            ElseIf trackIndex = previousTrack And trackIndex => musicFileCount
+                trackIndex=1
+            EndIf
+            ChDir "Data\Music" // Play music from this folder.
+            music=PlaySound(fileName(trackIndex),musicVolume)
+            ChDir "..\.." // Back to default folder.
+            
+        // If (PGUP or F9) is hit, play the next music file in index.
+        ElseIf KeyHit(201) Or ((KeyDown(56) Or KeyDown(184) Or KeyDown(29) Or KeyDown(157)) And KeyHit(67)) And musicEnabled=True Then
+
+            StopSound music // Stop the current track.
+            trackNameTimer=Timer()
+            If trackIndex < musicFileCount
+                trackIndex = trackIndex + 1
+            Else
+                trackIndex=1
+            EndIf
+            ChDir "Data\Music" // Play music from this folder.
+            music=PlaySound(fileName(trackIndex),musicVolume)
+            ChDir "..\.." // Back to default folder.
+            
+        // If (PGDN or F7) is hit, play the previous music file in index.
+        ElseIf KeyHit(209) Or ((KeyDown(56) Or KeyDown(184) Or KeyDown(29) Or KeyDown(157)) And KeyHit(65)) And musicEnabled=True Then
+        
+            StopSound music // Stop the current track.
+            trackNameTimer=Timer()
+            If trackIndex > 1
+                trackIndex = trackIndex - 1
+            Else
+                trackIndex = musicFileCount
+            EndIf
+            ChDir "Data\Music" // Play music from this folder.
+            music=PlaySound(fileName(trackIndex),musicVolume)
+            ChDir "..\.." // Back to default folder.
+        
+        // If F8 is hit then play a random track.
+        ElseIf ((KeyDown(56) Or KeyDown(184) Or KeyDown(29) Or KeyDown(157)) And KeyHit(66)) And musicEnabled=True Then
+
+            StopSound music // Stop the current track.
+            trackNameTimer=Timer()
+            previousTrack=trackIndex // Before randomizing new track, check the previous one.
+            trackIndex = Rand(1, musicFileCount) // Get random track index.
+            // Compare indexes. Don't play the same track twice in a row.
+            If trackIndex = previousTrack And trackIndex < musicFileCount
+                trackIndex + 1 // If it's the same, skip to next one.
+            ElseIf trackIndex = previousTrack And trackIndex => musicFileCount
+                trackIndex=1
+            EndIf
+            ChDir "Data\Music" // Play music from this folder.
+            music=PlaySound(fileName(trackIndex),musicVolume)
+            ChDir "..\.." // Back to default folder.
+            
+        EndIf
+        
+        // Set music volume (if changed).
+        If SoundPlaying(music)=ON And (checkVolume<>musicVolume Or checkMusicEnabled<>musicEnabled) Then
+        
+            tempVolume=musicVolume
+            If musicEnabled=False Then tempVolume=0
+            SetSound music,OFF,tempVolume
+            
+        EndIf
+        
+        // Display track name for some time.
+        If showTrackName=True Then
+            If Timer()<trackNameTimer+3000 // Show the name for 3 seconds.
+                SetFont font_small
+                DrawImage now_playing,(posX+501)-(TextWidth(shortFileName(trackIndex)))/2,(sh-25)-Min(posY*0.25,10)
+                DrawText((sw/2)+11, (sh-19)-Min(posY*0.25,10), shortFileName(trackIndex), font_small, 1, 255)
+            EndIf
+        EndIf
+        
+        checkVolume=musicVolume // Volume change check value.
+        checkMusicEnabled=musicEnabled // Music enabled check value.
+        
+    EndIf
+    
+Return
+
+// =====================================================================================================================================================================================================

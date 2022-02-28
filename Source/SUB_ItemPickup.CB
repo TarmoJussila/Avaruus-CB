@@ -1,0 +1,219 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - ItemPickup
+// =====================================================================================================================================================================================================
+ItemPickup:
+
+    If gameActive=True And gamePaused=False Then
+
+        For i = 1 To playerAmount
+            For iItem.ITEM = Each ITEM
+                If Distance(craftX(i), craftY(i), iItem\x, iItem\y)<=32.0 And craftArmor(i)>0 Then
+                    
+                    // Crate picked up. Randomize content on pickup.
+                    If iItem\id=18 Then
+                        iItem\id=Rand(0,11) // Change item id to random item.
+                    EndIf
+                    
+                    // When any item is collected, add it to statistics.
+                    collectedItems(i,iItem\id,1)=collectedItems(i,iItem\id,1)+1 // Rounds stats: Add item amount to current round stats.
+                    collectedItems(i,iItem\id,2)=collectedItems(i,iItem\id,2)+1 // Match stats: Add item amount to the total match stats.
+                    
+                    // Bishooter picked up.
+                    If iItem\id=0
+                        PlaySound snd_pickup_bishooter,soundVolume
+                        iItem\lifespan=0
+                        ammoBiso(i)=ammoBiso(i)+(10*weaponAmmo) : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoMine(i)=0 : ammoSprd(i)=0
+                        itemSwitchFrame(i)=1 : showItemName(i)=Timer()
+                        
+                    // Shotgun picked up.
+                    ElseIf iItem\id=1
+                        PlaySound snd_pickup_shotgun,soundVolume
+                        iItem\lifespan=0
+                        ammoShot(i)=ammoShot(i)+(5*weaponAmmo) : ammoBiso(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoMine(i)=0 : ammoSprd(i)=0
+                        itemSwitchFrame(i)=2 : showItemName(i)=Timer()
+                        
+                    // Machine gun picked up.
+                    ElseIf iItem\id=2
+                        PlaySound snd_pickup_machinegun,soundVolume
+                        iItem\lifespan=0
+                        ammoMgun(i)=ammoMgun(i)+(30*weaponAmmo) : ammoShot(i)=0 : ammoBiso(i)=0 : ammoBazo(i)=0 : ammoMine(i)=0 : ammoSprd(i)=0
+                        itemSwitchFrame(i)=3 : showItemName(i)=Timer()
+                        
+                    // Bazooka picked up.
+                    ElseIf iItem\id=3
+                        PlaySound snd_pickup_bazooka,soundVolume
+                        iItem\lifespan=0
+                        ammoBazo(i)=ammoBazo(i)+(3*weaponAmmo) : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBiso(i)=0 : ammoMine(i)=0 : ammoSprd(i)=0
+                        itemSwitchFrame(i)=4 : showItemName(i)=Timer()
+                        
+                    // Spreader picked up.
+                    ElseIf iItem\id=4
+                        PlaySound snd_pickup_spreader,soundVolume
+                        iItem\lifespan=0
+                        ammoSprd(i)=ammoSprd(i)+Max(weaponAmmo-1,1) : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoBiso(i)=0 : ammoMine(i)=0
+                        itemSwitchFrame(i)=5 : showItemName(i)=Timer()
+                        
+                    // Mine picked up.
+                    ElseIf iItem\id=5
+                        PlaySound snd_pickup_general,soundVolume
+                        iItem\lifespan=0
+                        ammoMine(i)=ammoMine(i)+Max(weaponAmmo-1,1) : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoBiso(i)=0 : ammoSprd(i)=0
+                        itemSwitchFrame(i)=6 : showItemName(i)=Timer()
+                        
+                    // Repair tool picked up.
+                    ElseIf iItem\id=6
+                        PlaySound snd_repair,soundVolume,0,Rand(40000,48000)
+                        craftArmor(i)=craftArmor(i)+20
+                        itemSwitchFrame(i)=7 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                    
+                    // Turbo tool picked up.
+                    ElseIf iItem\id=7
+                        PlaySound snd_turbo,soundVolume,0,Rand(40000,48000)
+                        turboDuration(i)=Timer()
+                        craftTurboActive(i)=1
+                        itemSwitchFrame(i)=8 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                        
+                    // Shield tool picked up.
+                    ElseIf iItem\id=8
+                        PlaySound snd_shield,soundVolume,0,Rand(40000,48000)
+                        shieldDuration(i)=Timer()
+                        craftShieldActive(i)=1
+                        For n = 1 To 16
+                            shieldPart(n) = CloneImage(shield)
+                        Next n
+                        itemSwitchFrame(i)=9 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                    
+                    // Magnet picked up.
+                    ElseIf iItem\id=9
+                        PlaySound snd_item_magnet,soundVolume
+                        // Spawning of some metallic items is pending.
+                        spawnMetalItems=True // Magnet item state active (will be disabled after spawning).
+                        itemSwitchFrame(i)=10 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+    
+                    // Spray paint picked up.
+                    ElseIf iItem\id=10
+                        PlaySound snd_item_paint,soundVolume
+                        newColor = Rand(0,5)
+                        // Never select already existing color.
+                        If playerAmount=2 Then
+                            For j=0 To 1
+                                If newColor = craftColor(1) Or newColor = craftColor(2) Then
+                                    newColor = newColor+1
+                                    If newColor>5 Then newColor=0
+                                EndIf
+                            Next j
+                        Else // Player amount = 3.
+                            For j=0 To 2
+                                If newColor = craftColor(1) Or newColor = craftColor(2) Or newColor = craftColor(3) Then
+                                    newColor = newColor+1
+                                    If newColor>5 Then newColor=0
+                                EndIf
+                            Next j
+                        EndIf
+                        // Change to new color.
+                        craftColor(i) = newColor
+                        If craftColor(i) = 0
+                            craftObj(i) = CloneImage(craft_1)
+                        ElseIf craftColor(i) = 1
+                            craftObj(i) = CloneImage(craft_2)
+                        ElseIf craftColor(i) = 2
+                            craftObj(i) = CloneImage(craft_3)
+                        ElseIf craftColor(i) = 3
+                            craftObj(i) = CloneImage(craft_4)
+                        ElseIf craftColor(i) = 4
+                            craftObj(i) = CloneImage(craft_5)
+                        ElseIf craftColor(i) = 5
+                            craftObj(i) = CloneImage(craft_6)
+                        EndIf
+                        itemSwitchFrame(i)=11 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                        
+                    // Sandglass picked up.
+                    ElseIf iItem\id=11
+                        PlaySound snd_item_time,soundVolume
+                        // Disappearance of all items is pending.
+                        disappearItems=True // Sandglass item state active (will be disabled after disappearance).
+                        itemSwitchFrame(i)=12 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                        
+                    // Whiskey bottle picked up.
+                    ElseIf iItem\id=12
+                        PlaySound snd_whiskey,soundVolume
+                        whiskeyDuration(i)=Timer()
+                        // Switch turn keys.
+                        If craftWhiskeyActive(i)=False // If not active yet.
+                            temp = craftRightKey(i)
+                            craftRightKey(i) = craftLeftKey(i)
+                            craftLeftKey(i) = temp
+                        EndIf
+                        // Make some changes to steering.
+                        craftThrust(i)=0.1 + Rnd(-0.05,0.01)
+                        craftTurnSpeed(i)=360 + Rand(-60,120)
+                        itemSwitchFrame(i)=13 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                        craftWhiskeyActive(i)=True
+                        
+                    // Shocker picked up.
+                    ElseIf iItem\id=13
+                        PlaySound snd_item_shocker,soundVolume
+                        // Explosion of all breakable items is pending.
+                        explodeItems=True // Shocker item state active (will be disabled after explosion).
+                        itemSwitchFrame(i)=14 : showItemName(i)=Timer()
+                        iItem\lifespan=0
+                    
+                    // Fruit is smashed by craft.
+                    ElseIf iItem\id=>14 And iItem\id=<17 And iItem\lifespan>0 // If object is fruit.
+                        // What kind of effect fruits have on crafts.
+                        If fruitSetting=True // FALSE = Fruits do nothing, TRUE = Fruits give armor.
+                            randFruitArmor=Rand(1,3)
+                            craftArmor(i)=craftArmor(i)+randFruitArmor // Give armor.
+                            itemSwitchFrame(i)=14+randFruitArmor : showItemName(i)=Timer()
+                        EndIf
+                        // Create particles for fruits.
+                        For j = 1 To Rand(3,5)
+                            newPart.PARTICLE = New(PARTICLE)
+                            If iItem\id=14
+                                newPart\obj = CloneImage(part_melon)
+                            ElseIf iItem\id=15
+                                newPart\obj = CloneImage(part_banana)
+                            ElseIf iItem\id=16
+                                newPart\obj = CloneImage(part_pineapple)
+                            ElseIf iItem\id=17
+                                newPart\obj = CloneImage(part_eggplant)
+                            EndIf
+                            newPart\angle = Rand(0,360)
+                            newPart\x = iItem\x
+                            newPart\y = iItem\y
+                            newPart\frame = Rand(0,23)
+                            newPart\speed = Rnd(0.2,2.0)
+                            newPart\frameDirection = Rand(0,1)
+                            newPart\frameChangeSpeed = Rand(20,100)
+                            newPart\lifespan = 2 // Lifespan is two screen passes.
+                        Next j
+                        
+                        // Play sound effect for fruit explosion.
+                        fruitSound=Rand(1,4) // Randomize which sound is played.
+                        If fruitSound=1
+                            PlaySound snd_fruit_1,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=2
+                            PlaySound snd_fruit_2,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=3
+                            PlaySound snd_fruit_3,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=4
+                            PlaySound snd_fruit_4,soundVolume,0,Rand(40000,48000)    
+                        EndIf
+                        
+                        iItem\lifespan=0
+                    EndIf
+                EndIf
+            Next iItem
+        Next i
+    
+    EndIf
+        
+Return 
+// =====================================================================================================================================================================================================

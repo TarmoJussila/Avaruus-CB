@@ -1,0 +1,240 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateBullets
+// =====================================================================================================================================================================================================
+UpdateBullets:
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    For iBullet.BULLET = Each BULLET
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If gamePaused=False Then
+            iBullet\x = iBullet\x + Cos(iBullet\angle) * PxPerSec(iBullet\speed*100) // X-axis.
+            iBullet\y = iBullet\y + Sin(iBullet\angle) * PxPerSec(iBullet\speed*100) // Y-axis.
+        EndIf
+    
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Crossing the border of the screen.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        // Bullets come from another direction.
+        If iBullet\x > sw+5 Then
+            iBullet\lifespan-1
+            If iBullet\lifespan>0 // If bullet lifespan is greater than zero, make it appear from the other side.
+                iBullet\x=-5
+            EndIf
+            
+        ElseIf iBullet\x < -5 Then
+            iBullet\lifespan-1
+            If iBullet\lifespan>0
+                iBullet\x=sw+5
+            EndIf
+            
+        ElseIf iBullet\y > sh+5 Then 
+            iBullet\lifespan-1
+            If iBullet\lifespan>0
+                iBullet\y=-5
+            EndIf
+            
+        ElseIf iBullet\y < -5 Then
+            iBullet\lifespan-1
+            If iBullet\lifespan>0
+                iBullet\y=sh+5
+            EndIf
+        EndIf
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Bullet damage to crafts.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+        For i = 1 To playerAmount 
+        
+            If Distance(craftX(i), craftY(i), iBullet\x, iBullet\y)<=(25.0+iBullet\size) And craftArmor(i)>0 Then
+            
+                If craftShieldActive(i)=False Then // If craft is not shielded, then do some damage.
+                    craftArmor(i)=craftArmor(i)-iBullet\damage // Craft armor is reduced the amount of damage that the bullet makes.
+                EndIf
+                
+                For p = 1 To playerAmount // Who shot who - data for statistics.
+                    If iBullet\owner = p Then
+                        craftShotsHit(p,1)=craftShotsHit(p,1)+1 : craftShotsHit(p,2)=craftShotsHit(p,2)+1
+                    EndIf
+                Next p        
+                
+                If iBullet\category = 1 Then // Normal type bullet.
+                    
+                    craftDamageTime(i)=craftDamageTime(i)+10 // Set craft damage time.
+                    
+                    // Push the damaged craft.
+                    force# = Rnd(0.1, 0.2)
+                    craftVelX(i) = craftVelX(i) + force# *  Cos(iBullet\angle)
+                    craftVelY(i) = craftVelY(i) - force# * -Sin(iBullet\angle)
+                
+                    hitSound=Rand(1,3) // Randomize which sound is played.
+                    If hitSound=1 Then
+                        PlaySound snd_hit_1,soundVolume,0,Rand(40000,48000)
+                    ElseIf hitSound=2 Then
+                        PlaySound snd_hit_2,soundVolume,0,Rand(40000,48000)
+                    ElseIf hitSound=3 Then
+                        PlaySound snd_hit_3,soundVolume,0,Rand(40000,48000)
+                    EndIf
+                    
+                ElseIf iBullet\category = 2 Then // Bazooka type bullet.
+                
+                    craftDamageTime(i)=craftDamageTime(i)+30 // Set craft damage time.
+                
+                    // Push the damaged craft.
+                    force# = Rnd(2.0, 2.5)
+                    craftVelX(i) = craftVelX(i) + force# *  Cos(iBullet\angle)
+                    craftVelY(i) = craftVelY(i) - force# * -Sin(iBullet\angle)
+                
+                    // Emit particles.
+                    For j = 1 To Rand(3,5)
+                        newPart.PARTICLE = New(PARTICLE)
+                        newPart\obj = CloneImage(part_general)
+                        newPart\angle = Rand(0,360)
+                        newPart\x = iBullet\x
+                        newPart\y = iBullet\y
+                        newPart\frame = Rand(0,23)
+                        newPart\speed = Rnd(1.0,2.0)
+                        newPart\frameDirection = Rand(0,1)
+                        newPart\frameChangeSpeed = Rand(20,100)
+                        newPart\lifespan = 2 // Lifespan is two screen passes.
+                    Next j
+                    
+                    // Play sound effect.
+                    PlaySound snd_hit_bazooka,soundVolume,0,Rand(40000,48000)
+                    
+                ElseIf iBullet\category = 3 Then // Mine type 'bullet'.
+                    
+                    craftDamageTime(i)=craftDamageTime(i)+30 // Set craft damage time.
+                    
+                    // Get angle between craft and mine.
+                    angleBetweenPoints = GetAngle(iBullet\x, iBullet\y, craftX(i), craftY(i))
+                    
+                    // Push the damaged craft.
+                    force# = Rnd(4.0, 4.5)
+                    craftVelX(i) = craftVelX(i) + force# * Cos(angleBetweenPoints)
+                    craftVelY(i) = craftVelY(i) - force# * Sin(angleBetweenPoints)
+                    
+                    // Emit particles.
+                    For j = 1 To Rand(3,5)
+                        newPart.PARTICLE = New(PARTICLE)
+                        newPart\obj = CloneImage(part_general)
+                        newPart\angle = Rand(0,360)
+                        newPart\x = iBullet\x
+                        newPart\y = iBullet\y
+                        newPart\frame = Rand(0,23)
+                        newPart\speed = Rnd(1.0,2.0)
+                        newPart\frameDirection = Rand(0,1)
+                        newPart\frameChangeSpeed = Rand(20,100)
+                        newPart\lifespan = 2 // Lifespan is two screen passes.
+                    Next j
+                    
+                    // Play sound effect.
+                    hitSound=Rand(1,3) // Randomize which sound is played.
+                    If hitSound=1 Then
+                        PlaySound snd_explosion_1,soundVolume,0,Rand(40000,48000)
+                    ElseIf hitSound=2 Then
+                        PlaySound snd_explosion_2,soundVolume,0,Rand(40000,48000)
+                    ElseIf hitSound=3 Then
+                        PlaySound snd_explosion_3,soundVolume,0,Rand(40000,48000)
+                    EndIf
+                    
+                EndIf
+                
+                // If shield active then play shield hit sound effect.
+                If craftShieldActive(i)=True Then
+                    PlaySound snd_hit_shield,Rand(soundVolume/2,soundVolume),0,Rand(40000,48000)
+                EndIf
+       
+                iBullet\lifespan = 0 // Bullet lifespan goes to zero.
+                
+            EndIf
+    
+        Next i
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Bullet effect on items: fruits and whiskey bottle.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        For iItem.ITEM = Each ITEM
+        
+            If Distance(iItem\x, iItem\y, iBullet\x, iBullet\y)<=(20.0+iBullet\size) Then
+                If iItem\id=12 Or (iItem\id=>14 And iItem\id=<17) And iItem\lifespan>0 Then // If object is fruit or whiskey.
+                    For i = 1 To Rand(3,5)
+                        newPart.PARTICLE = New(PARTICLE)
+                        If iItem\id=12 Then
+                            newPart\obj = CloneImage(part_pineapple) // NOTE: Whiskey bottle uses pineapple particles.
+                        ElseIf iItem\id=14 Then
+                            newPart\obj = CloneImage(part_melon)
+                        ElseIf iItem\id=15 Then
+                            newPart\obj = CloneImage(part_banana)
+                        ElseIf iItem\id=16 Then
+                            newPart\obj = CloneImage(part_pineapple)
+                        ElseIf iItem\id=17 Then
+                            newPart\obj = CloneImage(part_eggplant)
+                        EndIf
+                        newPart\angle = Rand(0,360)
+                        newPart\x = iItem\x
+                        newPart\y = iItem\y
+                        newPart\frame = Rand(0,23)
+                        newPart\speed = Rnd(0.2,2.0)
+                        newPart\frameDirection = Rand(0,1)
+                        newPart\frameChangeSpeed = Rand(20,100)
+                        newPart\lifespan = 2 // Lifespan is two screen passes.
+                    Next i
+                    
+                    // Play random fruit sound (if not whiskey).
+                    If Not iItem\id=12 Then
+                        fruitSound=Rand(1,4) // Randomize which sound is played.
+                        If fruitSound=1 Then
+                            PlaySound snd_fruit_1,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=2 Then
+                            PlaySound snd_fruit_2,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=3 Then
+                            PlaySound snd_fruit_3,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=4 Then
+                            PlaySound snd_fruit_4,soundVolume,0,Rand(40000,48000)    
+                        EndIf
+                    // Play glass break sound for whiskey bottle.
+                    Else
+                        PlaySound snd_hit_glass,soundVolume,0,Rand(40000,48000)
+                    EndIf
+                    
+                    iItem\lifespan=0
+                EndIf
+            EndIf
+        
+        Next iItem
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+        // Only Mine: How fast does the 'bullet' item appear to rotate.
+        If iBullet\category = 3 Then
+            If Timer()>iBullet\frameChangeTimer+50 And gamePaused=False Then
+                iBullet\frame = iBullet\frame + 1
+                iBullet\frameChangeTimer = Timer()
+            EndIf
+        EndIf
+    
+        If iBullet\frame > 23 Then iBullet\frame = 0
+        If iBullet\frame < 0 Then iBullet\frame = 23
+    
+        // Draw bullets on the screen.
+        If iBullet\lifespan>0 Then DrawObject(iBullet\obj,iBullet\x,iBullet\y,iBullet\frame)
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Delete bullet if lifespan is zero.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+        If iBullet\lifespan=<0 Then
+            DeleteImage iBullet\obj
+            Delete iBullet
+        EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    Next iBullet
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Return 
+// =====================================================================================================================================================================================================

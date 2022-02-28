@@ -1,0 +1,88 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdatePointerPosition
+// =====================================================================================================================================================================================================
+UpdatePointerPosition:
+
+    If isPointerActive=True Then
+    
+        isPointerMoving=False // Reset pointer moving state.
+        
+        // Update vertical pointer position with keyboard.
+        If KeyDown(200) Then
+            If MouseY()>0 Then PositionMouse MouseX(), Max(MouseY() - PxPerSec(pointerSpeed), 0)
+            isPointerMoving=True
+        ElseIf KeyDown(208) Then
+            If MouseY()<sh Then PositionMouse MouseX(), Min(MouseY() + PxPerSec(pointerSpeed), sh)
+            isPointerMoving=True
+        EndIf
+        
+        // Update horizontal pointer position with keyboard.
+        If KeyDown(205) Then
+            If MouseX()<sw Then PositionMouse Min(MouseX() + PxPerSec(pointerSpeed), sw), MouseY()
+            isPointerMoving=True
+        ElseIf KeyDown(203) Then
+            If MouseX()>0 Then PositionMouse Max(MouseX() - PxPerSec(pointerSpeed), 0), MouseY()
+            isPointerMoving=True
+        EndIf
+    
+        // Update pointer position with gamepad.
+        If gamepadSupport=True And isPointerMoving=False Then
+            For i = 1 To 3
+                If gamepadActive(i)=True Then
+                
+                    gamepad = (craftGamepad(i)-1)
+                    
+                    If XGamepadConnected(gamepad) Then
+                        // Update main gamepad value.
+                        mainGamepad = gamepad
+                        
+                        // Get left thumb X/Y movement.
+                        leftThumbY# = XInputLeftThumbYValue(gamepad) / 32767.0 // -1.0 to 1.0.
+                        leftThumbX# = XInputLeftThumbXValue(gamepad) / 32767.0 // -1.0 to 1.0.
+                        
+                        // Update vertical pointer position with gamepad D-pad.
+                        If XInputUpButton(gamepad) And MouseY()>0 Then
+                            PositionMouse MouseX(), Max(MouseY() - PxPerSec(pointerSpeed), 0)
+                            isPointerMoving=True
+                        ElseIf XInputDownButton(gamepad) And MouseY()<sh Then
+                            PositionMouse MouseX(), Min(MouseY() + PxPerSec(pointerSpeed), sh)
+                            isPointerMoving=True
+                        EndIf
+
+                        // Update horizontal pointer position with gamepad D-pad.
+                        If XInputRightButton(gamepad) And MouseX()<sw Then
+                            PositionMouse Min(MouseX() + PxPerSec(pointerSpeed), sw), MouseY()
+                            isPointerMoving=True
+                        ElseIf XInputLeftButton(gamepad) And MouseX()>0 Then
+                            PositionMouse Max(MouseX() - PxPerSec(pointerSpeed), 0), MouseY()
+                            isPointerMoving=True
+                        EndIf
+                        
+                        If isPointerMoving=False Then
+                            // Update vertical pointer position with gamepad left thumb.
+                            If leftThumbY#>0.25 And MouseY()>0 Then
+                                PositionMouse MouseX(), Max(MouseY() + PxPerSec(pointerSpeed * -leftThumbY#), 0)
+                            ElseIf leftThumbY#<-0.25 And MouseY()<sh Then
+                                PositionMouse MouseX(), Min(MouseY() + PxPerSec(pointerSpeed * -leftThumbY#), sh)
+                            EndIf
+    
+                            // Update horizontal pointer position with gamepad left thumb.
+                            If leftThumbX#>0.25 And MouseX()<sw Then
+                                PositionMouse Min(MouseX() + PxPerSec(pointerSpeed * leftThumbX#), sw), MouseY()
+                            ElseIf leftThumbX#<-0.25 And MouseX()>0 Then
+                                PositionMouse Max(MouseX() + PxPerSec(pointerSpeed * leftThumbX#), 0), MouseY()
+                            EndIf
+                        EndIf
+                        
+                        Exit // Exit loop after first active gamepad detected.
+                    EndIf
+                    
+                EndIf
+            Next i
+        EndIf
+    
+    EndIf
+    
+Return
+
+// =====================================================================================================================================================================================================

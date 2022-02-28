@@ -1,0 +1,26 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - MenuOverlay
+// =====================================================================================================================================================================================================
+MenuOverlay:
+
+    If menuActive=True Or gamePaused=True Or statsActive=True
+    
+        // Get correct values for overlay.
+        topMenuPosY = clampedPosY+97
+        bottomMenuPosY = sh-clampedPosY-108
+    
+        // Draw top horizontal line.
+        DrawImage menu_divider,50,topMenuPosY
+        DrawImage menu_divider_left,0,topMenuPosY
+        DrawImage menu_divider_right,sw-64,topMenuPosY
+        
+        // Draw bottom horizontal line.
+        DrawImage menu_divider,50,bottomMenuPosY
+        DrawImage menu_divider_left,0,bottomMenuPosY
+        DrawImage menu_divider_right,sw-64,bottomMenuPosY
+        
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================

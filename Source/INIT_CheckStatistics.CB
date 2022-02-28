@@ -1,0 +1,76 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - CheckStatistics
+// =====================================================================================================================================================================================================
+
+Dim topListAmount : topListAmount=5 // Top 5.
+
+// Create arrays and reserve space for top list amount + player amount to enable comparison/sorting of new top list values.
+Dim topName(topListAmount+3) As String
+Dim topColor(topListAmount+3)
+Dim topWins(topListAmount+3)
+Dim topLosses(topListAmount+3)
+Dim topRatio#(topListAmount+3)
+Dim topAccuracy(topListAmount+3)
+Dim topEnemyName(2,topListAmount+3) As String
+Dim topEnemyWins(2,topListAmount+3)
+Dim topEnemyLosses(2,topListAmount+3)
+
+// Check if statistics file exists (and that it is not a folder).
+If FileExists("Data\Statistics.dat")=True And IsDirectory("Data\Statistics.dat")=False Then
+
+    // Read statistics file.
+    f=OpenToRead("Data\Statistics.dat")
+    
+        totalRoundsPlayed = ReadLine(f)
+        totalPlayTime = ReadLine(f)
+        
+        For i=1 To topListAmount
+            topName(i) = ReadLine(f)
+            topColor(i) = ReadLine(f)
+            topWins(i) = ReadLine(f)
+            topLosses(i) = ReadLine(f)
+            topAccuracy(i) = ReadLine(f)
+            For j=1 To 2
+                topEnemyName(j,i) = ReadLine(f)
+                topEnemyWins(j,i) = ReadLine(f)
+                topEnemyLosses(j,i) = ReadLine(f)
+            Next j
+        Next i
+        
+    CloseFile f
+    
+    For i=1 To topListAmount
+        topName(i) = Trim(topName(i))
+        topColor(i) = Min(topColor(i),6)
+        topWins(i) = Min(topWins(i),9)
+        topLosses(i) = Min(topLosses(i),9)
+        topAccuracy(i) = Min(topAccuracy(i),100)
+        For j=1 To 2
+            topEnemyName(j,i) = Trim(topEnemyName(j,i))
+            topEnemyWins(j,i) = Min(topEnemyWins(j,i),9)
+            topEnemyLosses(j,i) = Min(topEnemyLosses(j,i),9)
+        Next j
+        // Calculate top score: More wins and less losses equals better top list position. Better accuracy solves even cases.
+        topRatio(i) = Float(topWins(i))*1 - Float(topLosses(i))*0.1 + topAccuracy(i)*0.0001
+    Next i
+    
+    totalRoundsPlayed = Max(totalRoundsPlayed, 0)
+    totalPlayTime = Max(totalPlayTime, 0)
+
+Else // If statistics file doesn't exist (or it is a folder) create one.
+
+    // Create statistics file.
+    f=OpenToWrite("Data\Statistics.dat")
+    
+        // Write default values in file.
+        WriteLine f,0 // totalRoundsPlayed.
+        WriteLine f,0 // totalPlayTime.
+ 
+    CloseFile f
+    
+    totalRoundsPlayed=0
+    totalPlayTime=0
+    
+EndIf
+
+// =====================================================================================================================================================================================================

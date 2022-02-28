@@ -1,0 +1,568 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Launcher
+// =====================================================================================================================================================================================================
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Pre-initialize.
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Dim isInitialScreenCheck : isInitialScreenCheck = True  // Is initial screen setting support check (only checked once at start).
+Dim screenSettingSupported(7)                           // Supported screen settings array (Supported = TRUE, Not supported = FALSE).
+Dim defaultAspectSetting : defaultAspectSetting = 2     // Default aspect setting. Default setting from save file will overwrite this.
+Dim gameSW, gameSH : gameSW=960 : gameSH=720            // Game screen width and screen height. Will be overridden by user settings.
+
+Gosub GetLauncherConfiguration
+Gosub GetInitialScreenSettings
+Gosub GetScreenSettings
+Gosub GetCommandLineConfiguration
+
+If showLauncher=False Then Gosub GetScreenOverrideSettings : Goto StartAvaruusGame // Start game instantly if launcher not on.
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Initialize screen.
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SCREEN 400,300,0,cbWindowed         // Set screen size and mode.
+SetWindow "AVARUUS - Launcher"      // Set window title.
+ClsColor 0, 0, 0
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Load assets.
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+launcher            = LoadImage     ("Data\Gfx\launcher.png")
+launcher_aspect     = LoadImage     ("Data\Gfx\launcher_aspect.png")
+launcher_screen     = LoadImage     ("Data\Gfx\launcher_screen.png")
+launcher_launch     = LoadImage     ("Data\Gfx\launcher_launch.png")
+menu_selection      = LoadImage     ("Data\Gfx\menu_selection.png")
+launcher_arrow_left = LoadImage     ("Data\Gfx\launcher_arrow_left.png")
+launcher_arrow_right= LoadImage     ("Data\Gfx\launcher_arrow_right.png")
+launcher_screen_sel = LoadAnimImage ("Data\Gfx\launcher_screen_sel.png" ,110,70,0,3)
+
+DefaultMask ON,255,0,255 // Magenta mask ON.
+digits_small        = LoadAnimImage ("Data\Gfx\digits_small.png"        ,10,10,0,10)
+digits_small_dark   = LoadAnimImage ("Data\Gfx\digits_small_dark.png"   ,10,10,0,10)
+digits_medium       = LoadAnimImage ("Data\Gfx\digits_medium.png"       ,14,14,0,10)
+digits_large        = LoadAnimImage ("Data\Gfx\digits_large.png"        ,20,20,0,10)
+digits_large_dark   = LoadAnimImage ("Data\Gfx\digits_large_dark.png"   ,20,20,0,10)
+menu_colon          = LoadAnimImage ("Data\Gfx\menu_colon.png"          ,9,18,0,2)
+menu_multiplier     = LoadAnimImage ("Data\Gfx\menu_multiplier.png"     ,9,9,0,2)
+DefaultMask OFF // Magenta mask OFF.
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Start of update loop.
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Repeat
+    
+    DrawImage launcher,0,0,0,0 // Draw background image file (no transparency).
+
+    mx=MouseX() : my=MouseY() // Get mouse position.
+
+    // Aspect ratio setting button.
+    If BoxOverlap(58,168,124,84,mx,my,1,1)
+    
+        If MouseHit(1)
+            aspectSetting=aspectSetting+1
+        ElseIf MouseHit(2)
+            aspectSetting=aspectSetting-1
+        EndIf 
+        If aspectSetting>7 Then aspectSetting=0
+        If aspectSetting<0 Then aspectSetting=7
+    
+        DrawObject(launcher_aspect,200,276)
+        DrawImage menu_selection,154,224
+    
+    // Window mode setting button.
+    ElseIf BoxOverlap(218,168,124,84,mx,my,1,1)
+    
+        If MouseHit(1)
+            screenSetting=screenSetting+1
+        ElseIf MouseHit(2)
+            screenSetting=screenSetting-1
+        EndIf
+        If screenSetting>2 Then screenSetting=0
+        If screenSetting<0 Then screenSetting=2
+        
+        DrawObject(launcher_screen,200,276)
+        DrawImage menu_selection,314,224
+    
+    // Launch game button.
+    ElseIf BoxOverlap(59,35,282,103,mx,my,1,1) Or BoxOverlap(85,39,231,78,mx,my,1,1)
+    
+        DrawObject(launcher_launch,200,276)
+        DrawImage launcher_arrow_left,58,59
+        DrawImage launcher_arrow_right,317,59
+        
+        // Save settings to file and launch game.
+        If MouseHit(1) And (devMode>0 Or settingsSupported=True) // If settings supported.
+            Gosub SetLauncherConfiguration // Save configuration.
+            Goto StartAvaruusGame // GOTO: Start game.
+        ElseIf MouseHit(1) And settingsSupported=0
+            flickerText=Timer() // If not supported, then flicker text.
+        EndIf
+        
+    EndIf
+    
+    // Do not display non-supported screen settings (if not dev mode).
+    If devMode<1 Then
+        While screenSettingSupported(aspectSetting)=False
+            aspectSetting=aspectSetting+1
+            If aspectSetting>7 Then aspectSetting=0
+        Wend
+    EndIf
+
+    Gosub GetScreenSettings // Get current screen settings.
+    
+    // Set updated selection values.
+    selectedResolutionWidth=gameSW : selectedResolutionHeight=gameSH
+    
+    // Set correct aspect ratio and resolution amounts.
+    If aspectSetting=<0 Then
+        selectedAspectRatioPrefix=21 : selectedAspectRatioSuffix=9  // 21:9.
+    ElseIf aspectSetting=1 Then
+        selectedAspectRatioPrefix=2 : selectedAspectRatioSuffix=1   // 2:1.
+    ElseIf aspectSetting=2 Then
+        selectedAspectRatioPrefix=16 : selectedAspectRatioSuffix=9  // 16:9.
+    ElseIf aspectSetting=3 Then
+        selectedAspectRatioPrefix=15 : selectedAspectRatioSuffix=9  // 15:9.
+    ElseIf aspectSetting=4 Then
+        selectedAspectRatioPrefix=16 : selectedAspectRatioSuffix=10 // 16:10.
+    ElseIf aspectSetting=5 Then
+        selectedAspectRatioPrefix=3 : selectedAspectRatioSuffix=2   // 3:2.
+    ElseIf aspectSetting=6 Then
+        selectedAspectRatioPrefix=4 : selectedAspectRatioSuffix=3   // 4:3.
+    ElseIf aspectSetting=>7 Then
+        selectedAspectRatioPrefix=5 : selectedAspectRatioSuffix=4   // 5:4.
+    EndIf
+    
+    // Set aspect ratio display offset for longer values.
+    If selectedAspectRatioPrefix>9 And selectedAspectRatioSuffix<=9 Then aspectOffset=10 Else aspectOffset=0
+    
+    // Check screen settings support.
+    If GetScreenModeSupport(selectedResolutionWidth,selectedResolutionHeight)=False Then
+        settingsSupported=False
+    Else
+        settingsSupported=True // Settings are supported by default.
+    EndIf
+    
+    // Set text flicker if incompatible screen mode.
+    If Timer()>flickerText+400 // Flicker text if trying a non-fit resolution.
+        aspectFontDim=True
+        smallFontFile=digits_small_dark
+        largeFontFile=digits_large_dark
+    Else
+        aspectFontDim=False
+        smallFontFile=digits_small
+        largeFontFile=digits_large
+    EndIf
+    
+    // Force normal text and font if supported aspect ratio.
+    If settingsSupported=True Then
+        aspectFontDim=False
+        smallFontFile=digits_small
+        largeFontFile=digits_large
+    EndIf
+    
+    // Aspect ratio.
+    DrawImage menu_colon,116+aspectOffset,189,aspectFontDim
+    DrawDigit(selectedAspectRatioPrefix,105+aspectOffset,198,largeFontFile,3,20)
+    DrawDigit(selectedAspectRatioSuffix,135+aspectOffset,198,largeFontFile,1,20)
+    
+    // Resolution.
+    DrawImage menu_multiplier,121,220,aspectFontDim
+    DrawDigit(selectedResolutionWidth,115,224,smallFontFile,3,10)
+    DrawDigit(selectedResolutionHeight,135,224,smallFontFile,1,10)
+    
+    // Draw screen setting selection.
+    DrawImage launcher_screen_sel,225,175, Min(screenSetting, 2)
+    
+    // Start game with keyboard.
+    If KeyHit(28) Or KeyHit(156)
+        If devMode>0 Or settingsSupported=True // If settings supported.
+            Gosub SetLauncherConfiguration // Save configuration.
+            Goto StartAvaruusGame // GOTO: Start game.
+        Else
+            flickerText=Timer() // If not supported, then flicker text.
+        EndIf 
+    EndIf
+    
+    // Shut down application with: ALT + F4
+    If (KeyDown(56) Or KeyDown(184)) And KeyHit(62) Then End
+
+    DrawScreen
+    
+Forever
+End
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// End of update loop.
+// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// =====================================================================================================================================================================================================
+// SUB: Get previous screen settings from launcher configuration file.
+// =====================================================================================================================================================================================================
+GetLauncherConfiguration:
+
+    // Check if launcher configuration file exists.
+    If FileExists("Data\Launcher.dat")=True And IsDirectory("Data\Launcher.dat")=False
+    
+        f=OpenToRead("Data\Launcher.dat")
+            launcherAspectRatio=ReadLine(f) // Read aspect ratio.
+            launcherScreenMode=ReadLine(f) // Read screen mode.
+        CloseFile f
+        
+        // If aspect ratio or screen mode in TXT-file is not an acceptable value.
+        If launcherAspectRatio<0 Or launcherAspectRatio>7 Or launcherScreenMode<0 Or launcherScreenMode>2
+            f=OpenToWrite("Data\Launcher.dat")
+                WriteLine f,2 // Write default value (2 = 16:9).
+                WriteLine f,0 // Write default value.
+            CloseFile f
+            launcherAspectRatio=2
+            launcherScreenMode=0
+        EndIf    
+    
+    // If settings file doesn't exist (or it is a folder) create one.
+    Else
+    
+        f=OpenToWrite("Data\Launcher.dat") // Create settings file.
+            WriteLine f,2 // Write default value (2 = 16:9).
+            WriteLine f,0 // Write default value.
+            launcherAspectRatio=2
+            launcherScreenMode=0
+        CloseFile f
+        
+    EndIf
+    
+    aspectSetting = launcherAspectRatio // Set initial value.
+    screenSetting = launcherScreenMode // Set initial value.
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get current aspect ratio setting and set game screen size setting accordingly.
+// =====================================================================================================================================================================================================
+SetLauncherConfiguration:
+
+    f=OpenToWrite("Data\Launcher.dat")
+        WriteLine f,aspectSetting // Save to file.
+        WriteLine f,screenSetting // Save to file.
+    CloseFile f
+    
+    // Override exclusive fullscreen mode if window fullscreen mode active. Resize window to fullscreen.
+    Gosub GetScreenOverrideSettings
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get initial screen settings (check support for each aspect ratio).
+// =====================================================================================================================================================================================================
+GetInitialScreenSettings:
+
+    defaultAspectSetting = aspectSetting // Store default aspect setting (will be restored later if supported).
+
+    // Initially all screen settings are supported.
+    For i=0 To 7
+        screenSettingSupported(i)=True
+    Next i
+    
+    // Check screen settings with all aspect ratios.
+    For i=0 To 7
+        aspectSetting=i
+        Gosub GetScreenSettings
+    Next i
+
+    // Check if default aspect setting is supported.
+    If screenSettingSupported(defaultAspectSetting)=True Then
+        aspectSetting = defaultAspectSetting // Restore and use default aspect setting if supported.
+    // Check and use first supported aspect setting.
+    Else
+        For i=0 To 7
+            If screenSettingSupported(i)=True Then
+                aspectSetting=i // Use first supported aspect setting.
+                Exit
+            EndIf
+        Next i
+    EndIf
+    
+    isInitialScreenCheck=False // Initial screen setting check is disabled.
+    
+    // Check and set screen color depth.
+    colorDepth = ScreenDepth() // Get desktop color depth.
+    
+    If colorDepth < 16 Then colorDepth = 0 // If color depth somehow below 16, set it to 0 (automatic).
+    If colorDepth > 32 Then colorDepth = 32 // If color depth over 32, limit it to 32.
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get current aspect ratio setting and set game screen size setting accordingly.
+// =====================================================================================================================================================================================================
+GetScreenSettings:
+    
+    // -------------------------------------------------------
+    // Supported resolutions:
+    // -------------------------------------------------------
+    // 21:9     = 1680x720 / 1792x768 / 1867x800 (2.333) [0] >>> TODO: 1866x800 (2.333)
+    // 2:1      = 1600x800 / 1536x768 / 1440x720 (2.000) [1]
+    // 16:9     = 1366x768 / 1360x768 / 1280x720 (1.777) [2] >>> TODO: 1365x768 (1.777)
+    // 15:9     = 1280x768 / 1200x720 / 1333x800 (1.666) [3]
+    // 16:10    = 1280x800 / 1152x720 / 1228x768 (1.600) [4] >>> TODO: 1229x768 (1.600)
+    // 3:2      = 1152x768 / 1080x720 / 1200x800 (1.500) [5]
+    // 4:3      = 1024x768 /  960x720 / 1067x800 (1.333) [6] >>> TODO: 1066x800 (1.333)
+    // 5:4      = 1024x800 /  960x768 / 1000x800 (1.250) [7] >>> TODO: 960x800  (1.200)
+    // -------------------------------------------------------
+    
+    If aspectSetting=<0 Then        // 21:9.
+        gameSW=1680 : gameSH=720
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 21:9. Fallback resolution for aspect ratio.
+            gameSW=1792 : gameSH=768
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1867 : gameSH=800
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1680 : gameSH=720
+                    If isInitialScreenCheck=True Then screenSettingSupported(0)=False // 0 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+        
+    ElseIf aspectSetting=1 Then     // 2:1.
+        gameSW=1600 : gameSH=800
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 2:1. Fallback resolution for aspect ratio.
+            gameSW=1536 : gameSH=768
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1440 : gameSH=720
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1600 : gameSH=800
+                    If isInitialScreenCheck=True Then screenSettingSupported(1)=False // 1 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf    
+    
+    ElseIf aspectSetting=2 Then     // 16:9.
+        gameSW=1366 : gameSH=768
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 16:9. Fallback resolution for aspect ratio.
+            gameSW=1360 : gameSH=768
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1280 : gameSH=720
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1366 : gameSH=768
+                    If isInitialScreenCheck=True Then screenSettingSupported(2)=False // 2 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    ElseIf aspectSetting=3 Then     // 15:9.
+        gameSW=1280 : gameSH=768
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 15:9. Fallback resolution for aspect ratio.
+            gameSW=1200 : gameSH=720
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1333 : gameSH=800
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1280 : gameSH=768
+                    If isInitialScreenCheck=True Then screenSettingSupported(3)=False // 3 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    ElseIf aspectSetting=4 Then     // 16:10.
+        gameSW=1280 : gameSH=800
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 16:10. Fallback resolution for aspect ratio.
+            gameSW=1152 : gameSH=720
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1228 : gameSH=768
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1280 : gameSH=800
+                    If isInitialScreenCheck=True Then screenSettingSupported(4)=False // 4 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    ElseIf aspectSetting=5 Then     // 3:2.
+        gameSW=1152 : gameSH=768
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 3:2. Fallback resolution for aspect ratio.
+            gameSW=1080 : gameSH=720
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1200 : gameSH=800
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1152 : gameSH=768
+                    If isInitialScreenCheck=True Then screenSettingSupported(5)=False // 5 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    ElseIf aspectSetting=6 Then     // 4:3.
+        gameSW=1024 : gameSH=768
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 4:3. Fallback resolution for aspect ratio.
+            gameSW=960 : gameSH=720
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1067 : gameSH=800
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1024 : gameSH=768
+                    If isInitialScreenCheck=True Then screenSettingSupported(6)=False // 6 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    ElseIf aspectSetting=>7 Then    // 5:4.
+        gameSW=1024 : gameSH=800
+        If GetScreenModeSupport(gameSW,gameSH)=False Then // 5:4. Fallback resolution for aspect ratio.
+            gameSW=960 : gameSH=768
+            If GetScreenModeSupport(gameSW,gameSH)=False Then // Second fallback resolution.
+                gameSW=1000 : gameSH=768
+                If GetScreenModeSupport(gameSW,gameSH)=False Then // If even second fallback resolution not supported then show default resolution in menu.
+                    gameSW=1024 : gameSH=800
+                    If isInitialScreenCheck=True Then screenSettingSupported(7)=False // 7 = False. This will not be used as initial screen setting.
+                EndIf
+            EndIf
+        EndIf
+    
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get screen override settings (exclusive/window fullscreen mode etc.).
+// =====================================================================================================================================================================================================
+GetScreenOverrideSettings:
+
+    // Resize sizable window to fullscreen if fullscreen (window) mode active.
+    If windowFullscreen=False And screenSetting=2 Then windowSetting=3
+
+    // Override exclusive fullscreen mode if window fullscreen mode active. Resize sizable window to fullscreen.
+    If windowFullscreen=True And screenSetting=0 Then screenSetting=2 : windowSetting=3
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get command line configuration (developer mode or override resolution).
+// =====================================================================================================================================================================================================
+GetCommandLineConfiguration:
+    
+    Dim commandLineContent As String : commandLineContent = CommandLine() // Read executable command line.
+    If Len(commandLineContent)>0 Then commandLineContent = Trim(Lower(commandLineContent)) // Trim and set to lowercase.
+    
+    If Len(commandLineContent)>=3 Then
+    
+        // Check and set launcher skip mode.
+        If InStr(commandLineContent,"launch")>0 Or InStr(commandLineContent,"skip")>0 Then // Find if command contains word 'launch' or 'skip' and set launcher mode OFF.
+            showLauncher=False
+        EndIf
+        
+        // Check and set windowed mode.
+        If InStr(commandLineContent,"win")>0 Then // Find if command contains word 'win' and set windowed mode ON.
+            screenSetting=1 : windowSetting=0
+        EndIf
+        
+        // Check and set fullscreen (window) mode.
+        If InStr(commandLineContent,"full")>0 Then // Find if command contains word 'full' and set fullscreen mode ON.
+            windowFullscreen=ON : screenSetting=2 : windowSetting=3
+        EndIf
+        
+        // Check and set exclusive fullscreen mode.
+        If InStr(commandLineContent,"exc")>0 Then // Find if command contains word 'exc' and set exclusive fullscreen mode ON.
+            windowFullscreen=OFF : screenSetting=0 : windowSetting=0
+        EndIf
+        
+        // Check and set frame limit mode.
+        If InStr(commandLineContent,"vsync")>0 Or InStr(commandLineContent,"frame")>0 Then // Find if command contains word 'vsync' or 'frame' and set frame limit ON.
+            limitFrameRate=True
+        EndIf
+        
+        // Check and set double frame rate mode.
+        If InStr(commandLineContent,"double")>0 Or InStr(commandLineContent,"speed")>0 Then // Find if command contains word 'double' or 'speed' and set double frame rate ON.
+            doubleFrameRate=True
+        EndIf
+        
+        // Check frame rate override settings only if double frame rate not on.
+        If doubleFrameRate=False Then
+            // Check and set 30Hz/36Hz mode.
+            If InStr(commandLineContent,"30hz")>0 Or InStr(commandLineContent,"36hz")>0 Then // Find if command contains word '30hz' or '36hz' and set frame limit to this.
+                forceFrameRate=True : forceFrameRate30=True
+            // Check and set 40Hz/48Hz mode.
+            ElseIf InStr(commandLineContent,"40hz")>0 Or InStr(commandLineContent,"48hz")>0 Then // Find if command contains word '40hz' or '48hz' and set frame limit to this.
+                forceFrameRate=True : forceFrameRate40=True
+            // Check and set 50Hz/59Hz mode.
+            ElseIf InStr(commandLineContent,"50hz")>0 Or InStr(commandLineContent,"59hz")>0 Then // Find if command contains word '50hz' or '59hz' and set frame limit to this.
+                forceFrameRate=True : forceFrameRate50=True
+            EndIf
+        EndIf
+        
+        // Check and set vsync mode to CPU.
+        If InStr(commandLineContent,"cpu")>0 Then // Find if command contains word 'cpu' and set vsync CPU mode ON.
+            vsyncSetting=0
+        EndIf
+        
+        // Check and set vsync mode to GPU.
+        If InStr(commandLineContent,"gpu")>0 Then // Find if command contains word 'gpu' and set vsync GPU mode ON.
+            vsyncSetting=1
+        EndIf
+        
+        // Check and set show track name.
+        If InStr(commandLineContent,"track")>0 Then // Find if command contains word 'track' and set show track name OFF.
+            showTrackName=False
+        EndIf
+        
+        // Check and set FPS mode.
+        If InStr(commandLineContent,"fps")>0 Then // Find if command contains word 'fps' and set FPS mode ON.
+            showFps=True
+        EndIf
+        
+        // Check and set developer mode.
+        If InStr(commandLineContent,"dev") Or InStr(commandLineContent,"ratio")>0 Then // Find if command contains word 'dev' or 'ratio' and set developer mode ON.
+            devMode=1
+        EndIf
+        
+        // Check and set debug mode (only if developer mode on).
+        If InStr(commandLineContent,"debug")>0 Then // Find if command contains word 'debug'.
+            If devMode>0 Then devMode=2 // Set debug mode (devMode=2) ON only if developer mode (devMode=1) ON.
+        EndIf
+        
+        // Check and set gamepad support mode.
+        If InStr(commandLineContent,"pad")>0 Then // Find if command contains word 'pad' and toggle gamepad support mode.
+            gamepadSupport=Not gamepadSupport
+        EndIf
+        
+        // Check and set custom resolution.
+        If Len(commandLineContent)>=7 // If more than 7 characters (e.g. 'xxx*xxx').
+        
+            cmdScreenWidth=0 : cmdScreenHeight=0
+            
+            If CountWords(commandLineContent,",")=>2 Then
+            
+                cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,","),5))
+                cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,","),5))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,","),4))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,","),4))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,","),3))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,","),3))
+                
+            ElseIf CountWords(commandLineContent,"*")=>2 Then
+            
+                cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"*"),5))
+                cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"*"),5))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"*"),4))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"*"),4))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"*"),3))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"*"),3))
+                
+            ElseIf CountWords(commandLineContent,"x")=>2 Then
+            
+                cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"x"),5))
+                cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"x"),5))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"x"),4))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"x"),4))
+                If cmdScreenWidth=0 Then cmdScreenWidth = Int(Right(GetWord(commandLineContent,1,"x"),3))
+                If cmdScreenHeight=0 Then cmdScreenHeight = Int(Left(GetWord(commandLineContent,2,"x"),3))
+                
+            EndIf
+            
+            If (cmdScreenWidth>0 And cmdScreenHeight>0) Then
+                cmdScreenWidth = Max(cmdScreenWidth, 960) // Minimum width is 960.
+                cmdScreenHeight = Max(cmdScreenHeight, 720) // Minimum height is 720.
+                gameSW=cmdScreenWidth : gameSH=cmdScreenHeight // Set forced resolution.
+                showLauncher=False // Always skip launcher if forced resolution.
+            EndIf 
+        
+        EndIf
+        
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================

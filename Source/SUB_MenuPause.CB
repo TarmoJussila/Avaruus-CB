@@ -1,0 +1,134 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - MenuPause
+// =====================================================================================================================================================================================================
+MenuPause:
+
+    // Toggle game pause menu enabled.
+    If gamePaused=False And gameActive=True And menuActive=False And statsActive=False Then
+        // Toggle pause menu with keyboard.
+        If KeyHit(1) And keyDelay=0 Then
+            gamePaused=True : keyDelay=1
+    
+        // Toggle pause menu with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+            gamePaused=True : keyDelay=1
+        EndIf
+    EndIf
+    
+    // If pause menu active.
+    If gamePaused=True Then
+        
+        Gosub CheckInputHit_Pause // Get input hit (pause).
+        
+        Gosub UpdatePointerPosition // Update pointer position.
+        If isPointerActive=False Then // Enable pointer (only once).
+            ShowMouse menu_cursor
+            isPointerActive=True
+        EndIf
+        
+        // Draw pause menu.
+        DrawObject(menu_txt_game_paused,posX+512,(sh-50)-(clampedPosY*0.5))
+        
+        // Current round and total round amount.
+        DrawObject(menu_current_round,posX+512,50+(clampedPosY*0.5))
+        DrawDigit(currentRound,posX+464,61+(clampedPosY*0.5),digits_large,3,20)
+        DrawDigit(roundAmount,posX+560,61+(clampedPosY*0.5),digits_large,1,20)
+        
+        // End match button.
+        DrawImage menu_endmatch,67,(sh-80)-(clampedPosY*0.5),endMatchFrame
+        endMatchFrame=0
+        If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1)
+            endMatchFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                Gosub ResetAndReturnToMainMenu : keyDelay=1
+            EndIf
+        EndIf
+        
+        // Continue button.
+        DrawImage menu_continue,sw-277,(sh-80)-(clampedPosY*0.5),continueFrame
+        continueFrame=0
+        If BoxOverlap(sw-124,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1)
+            continueFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                gamePaused=False : keyDelay=1
+            EndIf
+        EndIf
+        
+        // Return to main menu with keyboard.
+        If KeyHit(199) And keyDelay=0 Then Gosub ResetAndReturnToMainMenu
+    EndIf
+    
+    // Toggle game pause menu disabled.
+    If gamePaused=True And gameActive=True And menuActive=False And statsActive=False Then
+        // Continue round with keyboard.
+        If KeyHit(1) Or KeyHit(207) And keyDelay=0 Then
+            gamePaused=False : keyDelay=1
+            continueFrame=0 : endMatchFrame=0 // Reset button frames to zero.
+        
+        // Continue round with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputStartButton(mainGamepad, True)=True And XInputBackButton(mainGamepad)=False And keyDelay=0 Then
+            gamePaused=False : keyDelay=1
+        EndIf
+    EndIf
+    
+    // Reset key delay.
+    If keyDelay>0 Then keyDelay-1
+    If keyDelay=<0 Then keyDelay=0
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Return to main menu from pause menu (and reset game).
+// =====================================================================================================================================================================================================
+ResetAndReturnToMainMenu:
+
+    // Set player statistics to default.
+    For p = 1 To 3
+        craftShotsFired(p,2)=0 // Total craft shots fired to zero.
+        craftShotsHit(p,2)=0 // Total craft shots hit to zero.
+        For i = 0 To 17
+            collectedItems(p,i,2)=0 // Total collected item amounts to zero.
+        Next i
+    Next p
+    
+    // Reset game data.
+    Gosub GameReset
+    matchDuration=0
+    gameActive=False : gamePaused=False : menuActive=True : mainMenuActive=True
+    p1_wins=0 : p2_wins=0 : p3_wins=0 : p1_losses=0 : p2_losses=0 : p3_losses=0
+    continueFrame=0 : endMatchFrame=0 // Reset button frames to zero.
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get input hit.
+// =====================================================================================================================================================================================================
+CheckInputHit_Pause:
+
+    If gamePaused=True Then
+    
+        isInputHit=False
+        
+        If KeyHit(28) Or KeyHit(156) Then
+            isInputHit=True
+        ElseIf gamepadSupport=True Then
+            If mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True Then
+                isInputHit = XInputXButton(mainGamepad)
+                
+                // Save gamepad input hit state and falsify repeated (hold) input.
+                If isInputHit=True Then
+                    If isInputHit=wasGamepadInputHit Then
+                        isInputHit=False
+                    EndIf
+                    wasGamepadInputHit=True
+                Else
+                    wasGamepadInputHit=False
+                EndIf
+            EndIf
+        EndIf
+        
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================

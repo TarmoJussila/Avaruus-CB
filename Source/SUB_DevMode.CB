@@ -1,0 +1,51 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - DevMode
+// =====================================================================================================================================================================================================
+DevMode:
+
+    // Show FPS on screen.
+    If showFPS=True And devMode<2
+
+        SetFont font_small
+        Color 128,128,128
+        Text 3,2,FPS() // Display FPS.
+        
+    EndIf
+
+    // Show development variables on screen.
+    If devMode=2
+
+        SetFont font_small
+        Color 128,128,128
+        
+        If Timer()>+updateFpsTimer+200
+            updateFps = Int(1/FrameTime())
+            updateFpsTimer = Timer()
+        EndIf
+        
+        If updateFps<1 Then updateFps=60
+        If updateFps>999 Then updateFps=60
+        
+        Text 2,2,"FPS: "+FPS()+" ("+updateFps+")" // Display FPS and secondary FPS.
+        
+    // Show debug variables on screen.
+    ElseIf devMode>2
+    
+        SetFont font_small
+        Color 128,128,128
+        For i = 1 To playerAmount
+            Text 2+(i-1)*200,40,"Craft_thrust = "+craftThrust(i)
+            Text 2+(i-1)*200,60,"Craft_vel_x = "+craftVelX(i)
+            Text 2+(i-1)*200,80,"Craft_vel_y = "+craftVelY(i)
+            Text 2+(i-1)*200,100,"Craft_angle = "+craftAngle(i)
+            Text 2+(i-1)*200,120,"Craft_keybind = "+craftKeybind(i)
+            Text 2+(i-1)*200,140,"Craft_ThrustKey = "+craftThrustKey(i)
+            Text 2+(i-1)*200,160,"Craft_ShootKey = "+craftShootKey(i)
+        Next i
+        Text 2,20,"FPS = "+FPS()+" / Resolution = "+sw+"x"+sh // Display FPS.
+        Text 2,2,gameName + " / " + completeVersion
+        
+    EndIf
+
+Return
+// =====================================================================================================================================================================================================

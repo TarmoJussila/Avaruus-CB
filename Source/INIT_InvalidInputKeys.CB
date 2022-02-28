@@ -1,0 +1,50 @@
+//===============================================================================================================================================================================================================
+// AVARUUS - Initial - InvalidInputKeys
+//===============================================================================================================================================================================================================
+
+invalidKeyAmount=40
+Dim invalidKey(invalidKeyAmount) As Byte
+
+invalidKey(0) = 1 // ESCAPE.
+invalidKey(1) = 14 // BACKSP.
+invalidKey(2) = 15 // TAB.
+invalidKey(3) = 28 // RETURN.
+invalidKey(4) = 29 // LCTRL.
+invalidKey(5) = 41 // §.
+invalidKey(6) = 42 // LSHIFT.
+invalidKey(7) = 54 // RSHIFT.
+invalidKey(8) = 56 // LALT.
+invalidKey(9) = 57 // SPACE.
+invalidKey(10) = 58 // CASPL.
+invalidKey(11) = 59 // F1.
+invalidKey(12) = 60 // F2.
+invalidKey(13) = 61 // F3.
+invalidKey(14) = 62 // F4.
+invalidKey(15) = 63 // F5.
+invalidKey(16) = 64 // F6.
+invalidKey(17) = 65 // F7.
+invalidKey(18) = 66 // F8.
+invalidKey(19) = 67 // F9.
+invalidKey(20) = 68 // F10.
+invalidKey(21) = 69 // NUMLOCK.
+invalidKey(22) = 70 // SCROLL.
+invalidKey(23) = 87 // F11.
+invalidKey(24) = 88 // F12.
+invalidKey(25) = 156 // ENTER.
+invalidKey(26) = 157 // RCTRL.
+invalidKey(27) = 184 // RALT.
+invalidKey(28) = 199 // HOME.
+invalidKey(29) = 200 // UP.
+invalidKey(30) = 201 // PAGEUP.
+invalidKey(31) = 203 // LEFT.
+invalidKey(32) = 205 // RIGHT.
+invalidKey(33) = 207 // END.
+invalidKey(34) = 208 // DOWN.
+invalidKey(35) = 209 // PAGEDN.
+invalidKey(36) = 210 // INSERT.
+invalidKey(37) = 211 // DELETE.
+invalidKey(38) = 219 // LWIN.
+invalidKey(39) = 220 // RWIN.
+invalidKey(40) = 221 // SPECIAL.
+
+//===============================================================================================================================================================================================================

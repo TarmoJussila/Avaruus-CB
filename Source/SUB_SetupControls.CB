@@ -1,0 +1,48 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - SetupControls
+// =====================================================================================================================================================================================================
+SetupControls:
+
+    // Set player key bindings.
+    For i = 1 To playerAmount // Check every craft.
+    
+        If craftKeybind(i)=1 // 1 = (WASD + LSHIFT).
+            
+            craftThrustKey(i)=17        // W.
+            craftReverseKey(i)=31       // S.
+            craftRightKey(i)=32         // D.
+            craftLeftKey(i)=30          // A.
+            craftShootKey(i)=42         // LSHIFT.
+            
+        ElseIf craftKeybind(i)=2 // 2 = (ARROWS + RCTRL).
+            
+            craftThrustKey(i)=200       // Up.
+            craftReverseKey(i)=208      // Down.
+            craftRightKey(i)=205        // Right.
+            craftLeftKey(i)=203         // Left.
+            craftShootKey(i)=157        // RCTRL.
+            craftSecondaryShootKey(i)=184 // RALT. Secondary shoot key.
+            
+        ElseIf craftKeybind(i)=3 // 3 = (IJKL + SPACE).
+            
+            craftThrustKey(i)=23        // I.
+            craftReverseKey(i)=37       // K.
+            craftRightKey(i)=38         // L.
+            craftLeftKey(i)=36          // J.
+            craftShootKey(i)=57         // SPACE.
+            
+        ElseIf craftKeybind(i)=4 // 4 = (NUMPAD + ENTER).
+            
+            craftThrustKey(i)=72        // 8 (NUM-UP).
+            craftReverseKey(i)=76       // 5.
+            craftRightKey(i)=77         // 6 (NUM-RIGHT).
+            craftLeftKey(i)=75          // 4 (NUM-LEFT).
+            craftShootKey(i)=156        // ENTER.
+            
+        EndIf
+        
+    Next i // Move on to next craft, until none left.
+
+Return
+
+// =====================================================================================================================================================================================================

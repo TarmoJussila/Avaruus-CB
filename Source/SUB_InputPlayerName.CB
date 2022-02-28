@@ -1,0 +1,67 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - InputPlayerName
+// =====================================================================================================================================================================================================
+InputPlayerName:
+
+    playerId = 0
+    For i=1 To playerAmount
+        If pNameActive(i)=True
+            playerId = i
+        EndIf
+    Next i
+
+    If playerId > 0
+        If Timer()>pressed+50
+            pressedKey=GetKey()
+            
+            // Pre-validate input based on ASCII character.
+            // Number (48-57).
+            // Upper case alphabet (65-90).
+            // Lower case alphabet (97-122).
+            // Special alphabet characters (128-165). NOTE: Currently not in use: 'Or (pressedkey>=128 And pressedKey<=165)'.
+            // Fallback for special alphabet characters (192-255).
+            // Delete or backspace etc. (4, 8 or 127).
+            If (pressedKey>=48 And pressedKey<=57) Or (pressedKey>=65 And pressedKey<=90) Or (pressedKey>=97 And pressedKey<=122) Or (pressedkey>=192 And pressedKey<=255) Or pressedKey=8 Or pressedKey=4 Or pressedKey=127 Then
+               
+               // Check invalid input key collection.
+                validInput=True
+                For j=0 To invalidKeyAmount
+                    If KeyDown(invalidKey(j))=True
+                        validInput=False
+                        Exit
+                    EndIf
+                Next j
+                
+                // Make sure delete or backspace are never valid.
+                If validInput=True Then
+                    If pressedKey=8 Or pressedKey=4 Or pressedKey=127 Then
+                        validInput=False
+                    EndIf
+                EndIf
+                
+                // Add valid character to input field.
+                If validInput=True And Len(pNickName(playerId))<8 Then
+                    userInput(playerId) = Upper(Trim(Chr(pressedKey)))
+                    pNickName(playerId) = pNickName(playerId) + userInput(playerId)
+                    pressed = Timer()
+                // Remove characters from input field with backspace or delete.
+                ElseIf validInput=False And Len(pNickName(playerId))>0 And (KeyDown(14) Or KeyDown(211)) Then
+                    pNickName(playerId) = StrRemove(pNickName(playerId), Len(pNickName(playerId)), 1)
+                    pressed = Timer()
+                EndIf
+            EndIf
+        EndIf
+        
+        DrawText(inputPosX, inputPosY, pNickName(playerId), font_medium, 1, 255)
+        
+        // Blink input cursor.
+        If Timer()>record+200 Then blink=Not blink : record=Timer()
+        If blink Then Color 255,255,255 Else Color 0,0,0
+        
+        If Len(pNickName(playerId)) > 0 Then xFix=4 Else xFix=0
+        Box GetDrawTextWidth(pNickName(playerId))/2 + inputPosX + xFix, inputPosY-8, 2, 16
+        
+    EndIf
+
+Return
+// =====================================================================================================================================================================================================

@@ -1,0 +1,21 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateRoundDuration
+// =====================================================================================================================================================================================================
+UpdateRoundDuration:
+
+    If gameActive=True Then
+
+        If Timer()>roundDurationTimer+1000 And gamePaused=False Then
+            roundDuration=roundDuration+1
+            roundDurationTimer=Timer()
+        EndIf
+        
+        If displayRoundDuration=True Or gamePaused=True Then // Display round time during the game.
+            DrawTimerDigit(roundDuration,sw-77,50+(clampedPosY*0.5),digits_large,3,20,menu_colon)
+        EndIf
+        
+    EndIf
+    
+Return
+
+// =====================================================================================================================================================================================================

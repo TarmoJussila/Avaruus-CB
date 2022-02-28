@@ -1,0 +1,55 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - Gamepad
+// =====================================================================================================================================================================================================
+
+If FileExists("Data\Gamepad.dll")=False Or IsDirectory("Data\Gamepad.dll")=True Then gamepadSupport=False // Disable gamepad support if DLL not found.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// One controller/gamepad button state memory block size.
+Const MEM_XSTATE_SIZE   = 25
+
+// Create memory block and reserve space for 4 controllers/gamepads.
+Global memXInputState
+memXInputState = MakeMEMBlock(MEM_XSTATE_SIZE * 4)
+
+// Constants that reference button offsets in memory block.
+Const XINPUT_GAMEPAD_CONNECTED      = 0
+Const XINPUT_GAMEPAD_DPAD_UP        = 1
+Const XINPUT_GAMEPAD_DPAD_DOWN      = 2
+Const XINPUT_GAMEPAD_DPAD_LEFT      = 3
+Const XINPUT_GAMEPAD_DPAD_RIGHT     = 4
+Const XINPUT_GAMEPAD_START          = 5
+Const XINPUT_GAMEPAD_BACK           = 6
+Const XINPUT_GAMEPAD_LEFT_THUMB     = 7
+Const XINPUT_GAMEPAD_RIGHT_THUMB    = 8
+Const XINPUT_GAMEPAD_LEFT_SHOULDER  = 9
+Const XINPUT_GAMEPAD_RIGHT_SHOULDER = 10
+Const XINPUT_GAMEPAD_A              = 11
+Const XINPUT_GAMEPAD_B              = 12
+Const XINPUT_GAMEPAD_X              = 13
+Const XINPUT_GAMEPAD_Y              = 14
+Const XINPUT_GAMEPAD_LEFT_TRIGGER   = 15
+Const XINPUT_GAMEPAD_RIGHT_TRIGGER  = 16
+Const XINPUT_GAMEPAD_LEFT_THUMB_X   = 17
+Const XINPUT_GAMEPAD_LEFT_THUMB_Y   = 19
+Const XINPUT_GAMEPAD_RIGHT_THUMB_X  = 21
+Const XINPUT_GAMEPAD_RIGHT_THUMB_Y  = 23
+
+// On/off button previous states. Needed for inspecting clicks.
+Dim gXInputPrevState(14)
+
+// DeadZone means zero state for thumb sticks.
+Global gXInputDeadZone : gXInputDeadZone = 0
+Global gamepadDeadZone : gamepadDeadZone = 25 // DeadZone 0-100.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+If gamepadSupport=True Then InitXInput() // Initialize gamepad input (if support active and DLL found).
+
+Dim gamepadActive(3)
+gamepadActive(1)=Min(1, gamepadSupport) // Default is active. Will be force-disabled if no gamepad support.
+gamepadActive(2)=Min(1, gamepadSupport) // Default is active. Will be force-disabled if no gamepad support.
+gamepadActive(3)=Min(1, gamepadSupport) // Default is active. Will be force-disabled if no gamepad support.
+
+// =====================================================================================================================================================================================================

@@ -1,0 +1,892 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - Menu
+// =====================================================================================================================================================================================================
+Menu:
+
+    DrawObject(menu_logo,posX+512,50+(clampedPosY*0.5))
+    
+    Gosub CheckInputHit // Check input hit state (keyboard or gamepad).
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    If mainMenuActive=True Then
+
+        DrawImage menu_main,posX,posY
+        DrawObject(menu_txt_main_menu,posX+512,(sh-50)-(clampedPosY*0.5))
+        
+        DrawImage menu_info,67,20+(clampedPosY*0.5),infoFrame
+        infoFrame=0
+        If BoxOverlap(70,23+(clampedPosY*0.5),54,54,mx,my,1,1)
+            infoFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=False : infoMenuActive=True
+        EndIf
+        
+        DrawImage menu_exit,sw-277,20+(clampedPosY*0.5),exitFrame
+        exitFrame=0
+        If BoxOverlap(sw-124,23+(clampedPosY*0.5),54,54,mx,my,1,1)
+            exitFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then End // Exit the Game.
+        EndIf
+        
+        If BoxOverlap(185+posX,263+posY,194,194,mx,my,1,1)
+            DrawImage menu_selection,351+posX,429+posY : DrawImage menu_corner,182+posX,260+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=False : multiMenuActive=True
+            
+        ElseIf BoxOverlap(415+posX,263+posY,194,194,mx,my,1,1)
+            DrawImage menu_selection,581+posX,429+posY : DrawImage menu_corner,412+posX,260+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=False : settingsMenuActive=True
+            
+        ElseIf BoxOverlap(645+posX,263+posY,194,194,mx,my,1,1)
+            DrawImage menu_selection,811+posX,429+posY : DrawImage menu_corner,642+posX,260+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=False : statsMenuActive=True
+        EndIf
+        
+        // Zero button frames that are not visible.
+        backFrame=0 : playFrame=0
+        
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ElseIf infoMenuActive=True Then
+    
+        If devMode>0
+            DrawImage menu_intro_bonus,posX,posY
+            DrawImage menu_fan_bonus,posX+148,posY+422,fanFrame
+            DrawImage menu_fan_bonus,posX+812,posY+422,fanFrame
+            // Change animation frame.
+            If Timer()>fanFrameChangeTimer+40
+                fanFrame=fanFrame+1
+                If fanFrame>3
+                    fanFrame=0
+                EndIf
+                fanFrameChangeTimer = Timer()
+            EndIf
+        Else
+            DrawImage menu_intro,posX,posY
+        EndIf
+        
+        DrawObject(menu_txt_info,posX+512,(sh-50)-(clampedPosY*0.5))
+        
+        DrawObject(menu_info_code,180+posX,324+posY)
+        DrawObject(menu_info_tj,180+posX,383+posY)
+
+        DrawObject(menu_info_music,844+posX,324+posY)
+        DrawObject(menu_info_jh,844+posX,383+posY)
+        
+        If devMode>1 Then 
+            // Show complete version number.
+            DrawText(512+posX,150+posY,"VERSION "+completeVersion,font_medium,1,255)
+            DrawImage menu_multiplier,508+posX,181+posY
+            DrawDigit(gameSW,posX+496,posY+185,digits_medium,3,14)
+            DrawDigit(gameSH,posX+528,posY+185,digits_medium,1,14)
+            
+            // Show development year range.
+            DrawImage menu_line,502+posX,516+posY
+            DrawDigit(2006,posX+490,posY+522,digits_large,3,20)
+            DrawDigit(2018,posX+534,posY+522,digits_large,1,20)
+        EndIf
+        
+        If devMode>1 Then versionNumberOffset=12 Else versionNumberOffset=34
+        
+        // Show short version number.
+        DrawImage menu_dot,508+posX,576+posY-versionNumberOffset
+        DrawDigit(majorVersion,posX+492,posY+570-versionNumberOffset,digits_huge,3,30)
+        DrawDigit(minorVersion,posX+532,posY+570-versionNumberOffset,digits_huge,1,30)
+        
+        DrawImage menu_back,67,(sh-80)-(clampedPosY*0.5),backFrame
+        backFrame=0
+        If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1)
+            backFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=True : infoMenuActive=False
+        EndIf
+        
+        // Zero button frames that are not visible.
+        infoFrame=0
+        
+        // Return to main menu with keyboard.
+        If (KeyHit(199) Or KeyHit(1)) And keyDelay=0 Then
+            keyDelay=1
+            mainMenuActive=True : infoMenuActive=False
+        
+        // Return to main menu with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+            keyDelay=1
+            mainMenuActive=True : infoMenuActive=False
+        EndIf
+        
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ElseIf multiMenuActive=True Then
+    
+        DrawImage menu_multi,posX,posY
+        DrawObject(menu_txt_multiplayer,posX+512,(sh-50)-(clampedPosY*0.5))
+        
+        isPlayerThreeDisableHovered=False
+        isPlayerThreeDisablePressed=False
+        
+        // Toggle player 3 active state (above player name).
+        If BoxOverlap(402+posX,143+posY,70,11,mx,my,1,1)
+            DrawImage menu_multi_active,393+posX,143+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then pActive(3)=Not pActive(3)
+        // Toggle player 3 active state (X button).
+        ElseIf pActive(3)=True Then
+            If BoxOverlap(469+posX,188+posY,30,30,mx,my,1,1)
+                isPlayerThreeDisableHovered=True
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then pActive(3)=False : isPlayerThreeDisablePressed=True
+            EndIf
+        EndIf
+        
+        If pActive(3) = True Then playerAmount = 3 : P3_colorRGB = 255 // Make three crafts appear in-game if this is selected in menu.
+        If pActive(3) = False Then playerAmount = 2 : P3_craftFrame = 6 : P3_colorRGB = 100 // If player 3 not selected, then make his craft color available for others.
+        
+        isAnyPlayerNameClicked=False
+        
+        // Choose player name.
+        If BoxOverlap(80+posX,157+posY,114,23,mx,my,1,1)
+            DrawImage menu_name_select,72+posX,153+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then 
+                ClearKeys : pNameActive(1)=Not pNameActive(1) : keyDelay=1 : pNameActive(2)=False : pNameActive(3)=False : isAnyPlayerNameClicked=True
+            EndIf
+        ElseIf BoxOverlap(230+posX,157+posY,114,23,mx,my,1,1)
+            DrawImage menu_name_select,222+posX,153+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                ClearKeys : pNameActive(2)=Not pNameActive(2) : keyDelay=1 : pNameActive(1)=False : pNameActive(3)=False : isAnyPlayerNameClicked=True
+            EndIf
+        ElseIf BoxOverlap(380+posX,157+posY,114,23,mx,my,1,1) And pActive(3)=True
+            DrawImage menu_name_select,372+posX,153+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                ClearKeys : pNameActive(3)=Not pNameActive(3) : keyDelay=1 : pNameActive(1)=False : pNameActive(2)=False : isAnyPlayerNameClicked=True
+            EndIf
+        EndIf
+        
+        If isAnyPlayerNameClicked=True Then Gosub CheckPlayerNameValidity
+        
+        // Input player 1 name.
+        If pNameActive(1)=True
+            inputPosX=137+posX : inputPosY=168+posY
+            Gosub InputPlayerName
+            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                pNameActive(1)=False : keyDelay=1
+            ElseIf KeyHit(15) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                pNameActive(1)=False : pNameActive(2)=True : keyDelay=1 // Jump to Player 2 input.
+            EndIf
+        ElseIf pNameActive(1)=False
+            DrawText(137+posX, 168+posY, pNickName(1), font_medium, 1, 255)
+        EndIf
+        
+        // Input player 2 name.
+        If pNameActive(2)=True
+            inputPosX=287+posX : inputPosY=168+posY
+            Gosub InputPlayerName
+            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                pNameActive(2)=False : keyDelay=1
+            ElseIf KeyHit(15) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                If pActive(3)=True
+                    pNameActive(2)=False : pNameActive(3)=True : keyDelay=1 // Jump to Player 3 input.
+                Else
+                    pNameActive(2)=False : pNameActive(1)=True : keyDelay=1 // Jump to Player 1 input.
+                EndIf
+            EndIf
+        ElseIf pNameActive(2)=False
+            DrawText(287+posX, 168+posY, pNickName(2), font_medium, 1, 255)
+        EndIf
+        
+        // Input player 3 name.
+        If pNameActive(3)=True
+            inputPosX=437+posX : inputPosY=168+posY
+            Gosub InputPlayerName
+            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                pNameActive(3)=False : keyDelay=1
+            ElseIf KeyHit(15) And keyDelay=0 Then
+                Gosub CheckPlayerNameValidity
+                pNameActive(3)=False : pNameActive(1)=True : keyDelay=1 // Jump to Player 1 input.
+            EndIf
+        ElseIf pNameActive(3)=False
+            DrawText(437+posX, 168+posY, pNickName(3), font_medium, 1, P3_colorRGB)
+        EndIf
+        
+        // Choose craft color.
+        If BoxOverlap(75+posX,188+posY,124,116,mx,my,1,1)
+            DrawImage menu_selection,171+posX,276+posY : DrawImage menu_multi_p1,84+posX,197+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                P1_craftFrame=P1_craftFrame+1
+                If P1_craftFrame > 5 Then P1_craftFrame = 0
+            EndIf
+            For i=0 To 1 // Check twice for overlapping color and skip them.
+                If P1_craftFrame=P2_craftFrame Or P1_craftFrame=P3_craftFrame Then P1_craftFrame=P1_craftFrame+1
+                If P1_craftFrame > 5 Then P1_craftFrame = 0
+            Next i
+            
+        ElseIf BoxOverlap(225+posX,188+posY,124,116,mx,my,1,1)
+            DrawImage menu_selection,321+posX,276+posY : DrawImage menu_multi_p2,234+posX,197+posY
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                P2_craftFrame=P2_craftFrame+1
+                If P2_craftFrame > 5 Then P2_craftFrame = 0
+            EndIf
+            For i=0 To 1 // Check twice for overlapping color and skip them.
+                If P2_craftFrame=P1_craftFrame Or P2_craftFrame=P3_craftFrame Then P2_craftFrame=P2_craftFrame+1
+                If P2_craftFrame > 5 Then P2_craftFrame = 0
+            Next i
+        
+        ElseIf BoxOverlap(375+posX,188+posY,124,116,mx,my,1,1) And isPlayerThreeDisablePressed=False And isPlayerThreeDisableHovered=False
+            DrawImage menu_selection,471+posX,276+posY
+            If pActive(3)=False Then
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then pActive(3)=Not pActive(3)
+            Else
+                If MouseHit(2) And keyDelay=0 Then
+                    pActive(3)=Not pActive(3)
+                Else
+                    DrawImage menu_multi_p3,384+posX,197+posY
+                    If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                        P3_craftFrame=P3_craftFrame+1
+                        If P3_craftFrame > 5 Then P3_craftFrame = 0
+                    EndIf
+                    For i=0 To 1 // Check twice for overlapping color and skip them.
+                        If P3_craftFrame=P1_craftFrame Or P3_craftFrame=P2_craftFrame Then P3_craftFrame=P3_craftFrame+1
+                        If P3_craftFrame > 5 Then P3_craftFrame = 0
+                    Next i
+                EndIf
+            EndIf
+        EndIf
+
+        // Check for min/max color values for players 1 and 2.
+        If P1_craftFrame > 5 Then P1_craftFrame = 0
+        If P1_craftFrame < 0 Then P1_craftFrame = 5
+        If P2_craftFrame > 5 Then P2_craftFrame = 0
+        If P2_craftFrame < 0 Then P2_craftFrame = 5
+        
+        // Check that player 3 never overlaps with other selected colors.
+        If pActive(3)=True Then
+            For i=0 To 1 // Check twice for overlapping color and skip them.
+                If P3_craftFrame=P1_craftFrame Or P3_craftFrame=P2_craftFrame Then P3_craftFrame=P3_craftFrame+1
+                If P3_craftFrame > 5 Then P3_craftFrame = 0
+            Next i
+            If P3_craftFrame < 0 Then P3_craftFrame = 5
+        EndIf
+        
+        DrawImage menu_multi_active,93+posX,143+posY : DrawImage menu_craft_select_1,posX+87,posY+207,P1_craftFrame
+        DrawImage menu_multi_active,243+posX,143+posY : DrawImage menu_craft_select_2,posX+237,posY+207,P2_craftFrame
+        If pActive(3)=True Then DrawImage menu_multi_active,393+posX,143+posY : DrawImage menu_craft_select_3,posX+387,posY+207,P3_craftFrame
+        DrawImage menu_player_select,posX+466,posY+185,pActive(3)
+        
+        // Choose weapons, tools and others items which are enabled.
+        For i=1 To 6 // Weapons.
+            If BoxOverlap(-4+156+74+posX+(i*74),340+posY,54,54,mx,my,1,1)
+                DrawImage menu_item_select,-8+156+74+posX+(i*74),336+posY
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then weaponActive(i)=Not weaponActive(i)
+                DrawImage menu_arrow_right,posX+240,posY+349
+                DrawImage menu_arrow_left,posX+754,posY+349
+            EndIf
+            If weaponActive(i)=False Then DrawImage menu_item_crossed,-8+156+74+posX+(i*74),336+posY
+        Next i
+        
+        For i=1 To 6 // Tools.
+            If BoxOverlap(-4+156+74+posX+(i*74),430+posY,54,54,mx,my,1,1)
+                DrawImage menu_item_select,-8+156+74+posX+(i*74),426+posY
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then toolActive(i)=Not toolActive(i)
+                DrawImage menu_arrow_right,posX+240,posY+439
+                DrawImage menu_arrow_left,posX+754,posY+439
+            EndIf
+            If toolActive(i)=False Then DrawImage menu_item_crossed,-8+156+74+posX+(i*74),426+posY
+        Next i
+        
+        For i=1 To 6 // Other.
+            If BoxOverlap(-4+156+74+posX+(i*74),520+posY,54,54,mx,my,1,1)
+                DrawImage menu_item_select,-8+156+74+posX+(i*74),516+posY
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then otherActive(i)=Not otherActive(i)
+                DrawImage menu_arrow_right,posX+240,posY+529
+                DrawImage menu_arrow_left,posX+754,posY+529
+            EndIf
+            If otherActive(i)=False Then DrawImage menu_item_crossed,-8+156+74+posX+(i*74),516+posY
+        Next i
+        
+        // Set round amount.
+        If BoxOverlap(posX+825,posY+146,124,158,mx,my,1,1)
+            DrawImage menu_selection,posX+921,posY+276
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then roundAmount=roundAmount+1
+            If MouseHit(2) And keyDelay=0 Then roundAmount=roundAmount-1
+        EndIf
+        If roundAmount<1 Then roundAmount=9
+        If roundAmount>9 Then roundAmount=1
+        DrawDigit(roundAmount,posX+887,posY+231,digits_humongous,2,60)
+        
+        // Set craft ARMOR.
+        If BoxOverlap(posX+525,posY+146,124,66,mx,my,1,1)
+            DrawImage menu_selection,posX+621,posY+184
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then playerArmor=playerArmor+25
+            If MouseHit(2) And keyDelay=0 Then playerArmor=playerArmor-25
+        EndIf
+        If playerArmor<25 Then playerArmor=200
+        If playerArmor>200 Then playerArmor=25
+        DrawDigit(playerArmor,posX+587,posY+187,digits_large,2,20)
+        
+        // Set weapon AMMO.
+        If BoxOverlap(posX+675,posY+146,124,66,mx,my,1,1)
+            DrawImage menu_selection,posX+771,posY+184
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then weaponAmmo = weaponAmmo+1
+            If MouseHit(2) And keyDelay=0 Then weaponAmmo = weaponAmmo-1
+        EndIf
+        If weaponAmmo < 1 Then weaponAmmo = 3
+        If weaponAmmo > 3 Then weaponAmmo = 1
+        DrawImageBox menu_bar_small, posX+704, posY+176, 0, 0, weaponAmmo * 22, 22
+        
+        // Set craft SPEED.
+        If BoxOverlap(posX+525,posY+238,124,66,mx,my,1,1)
+            DrawImage menu_selection,posX+621,posY+276
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then playerSpeed = playerSpeed+1
+            If MouseHit(2) And keyDelay=0 Then playerSpeed = playerSpeed-1
+        EndIf
+        If playerSpeed < 1 Then playerSpeed = 3
+        If playerSpeed > 3 Then playerSpeed = 1
+        DrawImageBox menu_bar_small, posX+554, posY+268, 0, 0, playerSpeed * 22, 22
+        
+        // Set craft DRAG.
+        If BoxOverlap(posX+675,posY+238,124,66,mx,my,1,1)
+            DrawImage menu_selection,posX+771,posY+276
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then playerDrag = playerDrag+1
+            If MouseHit(2) And keyDelay=0 Then playerDrag = playerDrag-1
+        EndIf
+        If playerDrag < 1 Then playerDrag = 3
+        If playerDrag > 3 Then playerDrag = 1
+        DrawImageBox menu_bar_small, posX+704, posY+268, 0, 0, playerDrag * 22, 22
+        
+        // Set WEAPONS frequency.
+        If BoxOverlap(posX+825,posY+340,124,54,mx,my,1,1)
+            DrawImage menu_selection,posX+921,posY+366
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then weaponBarAmount = weaponBarAmount+1
+            If MouseHit(2) And keyDelay=0 Then weaponBarAmount = weaponBarAmount-1
+        EndIf
+        If weaponBarAmount < 1 Then weaponBarAmount = 5
+        If weaponBarAmount > 5 Then weaponBarAmount = 1
+        DrawImageBox menu_bar, posX+844, posY+355, 0, 0, weaponBarAmount * 17, 24
+
+        // Set TOOLS frequency.
+        If BoxOverlap(posX+825,posY+430,124,54,mx,my,1,1)
+            DrawImage menu_selection,posX+921,posY+456
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then toolBarAmount = toolBarAmount+1
+            If MouseHit(2) And keyDelay=0 Then toolBarAmount = toolBarAmount-1
+        EndIf
+        If toolBarAmount < 1 Then toolBarAmount = 5
+        If toolBarAmount > 5 Then toolBarAmount = 1
+        DrawImageBox menu_bar, posX+844, posY+445, 0, 0, toolBarAmount * 17, 24
+        
+        // Set OTHER frequency.
+        If BoxOverlap(posX+825,posY+520,124,54,mx,my,1,1)
+            DrawImage menu_selection,posX+921,posY+546
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then otherBarAmount = otherBarAmount+1
+            If MouseHit(2) And keyDelay=0 Then otherBarAmount = otherBarAmount-1
+        EndIf
+        If otherBarAmount < 1 Then otherBarAmount = 5
+        If otherBarAmount > 5 Then otherBarAmount = 1
+        DrawImageBox menu_bar, posX+844, posY+535, 0, 0, otherBarAmount * 17, 24
+        
+        // Menu BACK with pointer.
+        DrawImage menu_back,67,(sh-80)-(clampedPosY*0.5),backFrame
+        backFrame=0
+        If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1) Then
+            backFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                keyDelay=1
+                // Save game setup.
+                Gosub CheckPlayerNameValidity
+                Gosub SaveMultiplayerSettings
+                // Switch menu pages.
+                mainMenuActive=True : multiMenuActive=False
+            EndIf
+        EndIf
+        
+        // Menu BACK with keyboard.
+        If (KeyHit(199) Or KeyHit(1)) And keyDelay=0 Then
+            keyDelay=1
+            // Save game setup.
+            Gosub CheckPlayerNameValidity
+            Gosub SaveMultiplayerSettings
+            // Switch menu pages.
+            mainMenuActive=True : multiMenuActive=False
+        
+        // Menu BACK with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+            keyDelay=1
+            // Save game setup.
+            Gosub CheckPlayerNameValidity
+            Gosub SaveMultiplayerSettings
+            // Switch menu pages.
+            mainMenuActive=True : multiMenuActive=False
+        EndIf
+        
+        // Menu PLAY with pointer.
+        DrawImage menu_play,sw-277,(sh-80)-(clampedPosY*0.5),playFrame
+        playFrame=0
+        If BoxOverlap(sw-124,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1) Then
+            playFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                keyDelay=1
+                // Save game setup.
+                Gosub CheckPlayerNameValidity
+                Gosub SaveMultiplayerSettings
+                // Sub programs.
+                Gosub SetupControls
+                Gosub GameReset
+                // Re-init values.
+                matchDuration=0
+                currentRound=1 // Current round is 1 at start.
+                mainMenuActive=False : multiMenuActive=False : menuActive=False : gameActive=True
+            EndIf
+        EndIf
+        
+        // Menu PLAY with keyboard.
+        If KeyHit(207) And keyDelay=0 Then
+            keyDelay=1
+            // Save game setup.
+            Gosub CheckPlayerNameValidity
+            Gosub SaveMultiplayerSettings
+            // Sub programs.
+            Gosub SetupControls
+            Gosub GameReset
+            // Re-init values.
+            matchDuration=0
+            currentRound=1 // Current round is 1 at start.
+            mainMenuActive=False : multiMenuActive=False : menuActive=False : gameActive=True
+        
+        // Menu PLAY with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputStartButton(mainGamepad, True)=True And XInputBackButton(mainGamepad)=False And keyDelay=0 Then
+            keyDelay=1
+            // Save game setup.
+            Gosub CheckPlayerNameValidity
+            Gosub SaveMultiplayerSettings
+            // Sub programs.
+            Gosub SetupControls
+            Gosub GameReset
+            // Re-init values.
+            matchDuration=0
+            currentRound=1 // Current round is 1 at start.
+            mainMenuActive=False : multiMenuActive=False : menuActive=False : gameActive=True
+        EndIf
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ElseIf settingsMenuActive=True Then
+    
+        DrawImage menu_settings,posX,posY
+        DrawObject(menu_txt_settings,posX+512,(sh-50)-(clampedPosY*0.5))
+        
+        // Keyboard/gamepad binding hover id and player hover id.
+        bindingHoverId=-1 : playerHoverId=0
+        
+        // Get free keybind index.
+        freeKeybind=10 // 1 + 2 + 3 + 4 = 10.
+        For i = 1 To 3
+            For j = 1 To 4
+                If craftKeybind(i)=j Then freeKeybind=freeKeybind-j // Result will be 1-4 (i.e. the free keybind index).
+            Next j
+        Next i
+        
+        // Toggle keyboard bindings.
+        For i = 1 To 3
+            If BoxOverlap(posX+155,posY+210+(i-1)*110,124,79,mx,my,1,1)
+                DrawImage menu_selection,posX+251,posY+261+(i-1)*110
+                If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then craftKeybind(i)=freeKeybind : keyDelay=1
+                bindingHoverId=craftKeybind(i)-1 : playerHoverId=i
+            EndIf
+            DrawObject(menu_settings_controls,posX+217,posY+249+((i-1)*110),craftKeybind(i)-1)
+        Next i
+        
+        // Get free gamepad index.
+        freeGamepad=10 // 1 + 2 + 3 + 4 = 10.
+        For i = 1 To 3
+            For j = 1 To 4
+                If craftGamepad(i)=j Then freeGamepad=freeGamepad-j // Result will be 1-4 (i.e. the free gamepad index).
+            Next j
+        Next i
+        
+        // Toggle gamepad bindings.
+        For i = 1 To 3
+            If BoxOverlap(posX+305,posY+210+(i-1)*110,124,79,mx,my,1,1)
+                DrawImage menu_selection,posX+401,posY+261+(i-1)*110
+                If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then craftGamepad(i)=freeGamepad : keyDelay=1
+                bindingHoverId=4 : playerHoverId=i
+            EndIf
+            DrawObject(menu_txt_pad,posX+367,posY+226+((i-1)*110))
+            DrawDigit(craftGamepad(i),posX+367,posY+257+((i-1)*110),digits_huge,3,30)
+        Next i
+        
+        // Show gamepad state indicators.
+        For i = 1 To 3
+            gamepadConnectState = False
+            If gamepadSupport=True Then gamepadConnectState = XGamepadConnected(craftGamepad(i)-1)
+            DrawImage menu_gamepad_state,posX+399,posY+216+(i-1)*110,gamepadConnectState
+        Next i
+        
+        // Display current controls when hovering keyboard/gamepad bindings.
+        If bindingHoverId>=0 And bindingHoverId<=4 Then
+            DrawImage menu_settings_move,posX+537,posY+244,bindingHoverId
+            DrawImage menu_settings_shoot,posX+537,posY+447,bindingHoverId
+            
+            // Display craft color from multiplayer settings here.
+            For i=1 To 3
+                craftSettingColor(i)=craftColor(i)
+            Next i
+            
+            // Make sure player 3 color does not show dimmed or undefined.
+            If pActive(3)=False Or P3_craftFrame>5 Then
+                P3_tempCraftFrame = P3_craftFrame
+                For i=0 To 1 // Check twice for overlapping color and skip them.
+                    If P3_tempCraftFrame=P1_craftFrame Or P3_tempCraftFrame=P2_craftFrame Then P3_tempCraftFrame=P3_tempCraftFrame+1
+                    If P3_tempCraftFrame > 5 Then P3_tempCraftFrame = 0
+                Next i
+                craftSettingColor(1)=P1_craftFrame : craftSettingColor(2)=P2_craftFrame : craftSettingColor(3)=P3_tempCraftFrame
+            EndIf
+            
+            DrawImage round_stats_crafts,posX+512,posY+300,Min(craftSettingColor(playerHoverId),5)
+            If playerHoverId=1 Then DrawImage menu_multi_p1,posX+469,posY+224
+            If playerHoverId=2 Then DrawImage menu_multi_p2,posX+469,posY+224
+            If playerHoverId=3 Then DrawImage menu_multi_p3,posX+469,posY+224
+            DrawImage menu_txt_move,posX+537,posY+219,True
+            DrawImage menu_txt_shoot,posX+537,posY+486,True
+        Else
+            If playerHoverId=0 Then DrawImage menu_multi_p0,posX+469,posY+224
+            DrawImage menu_txt_move,posX+537,posY+219,False
+            DrawImage menu_txt_shoot,posX+537,posY+486,False
+            DrawText(posX+587, posY+258, "-", font_medium, 1, 100)
+            DrawText(posX+587, posY+460, "-", font_medium, 1, 100)
+        EndIf
+        
+        // Set music volume.
+        If BoxOverlap(posX+745,posY+210,124,79,mx,my,1,1)
+            DrawImage menu_selection,posX+841,posY+261
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then musicBarAmount = musicBarAmount+1 : musicEnabled=True
+            If MouseHit(2) And keyDelay=0 Then musicBarAmount = musicBarAmount-1 : musicEnabled=True
+        EndIf
+        If musicBarAmount < 1 Then musicBarAmount = 5
+        If musicBarAmount > 5 Then musicBarAmount = 1
+        If musicEnabled=True Then DrawImageBox menu_bar, posX+764, posY+242, 0, 0, musicBarAmount * 17, 24
+        musicVolume = (musicBarAmount*100)/5
+        
+        // Set sound volume.
+        If BoxOverlap(posX+745,posY+320,124,79,mx,my,1,1)
+            DrawImage menu_selection,posX+841,posY+371
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then soundBarAmount = soundBarAmount+1 : soundEnabled=True
+            If MouseHit(2) And keyDelay=0 Then soundBarAmount = soundBarAmount-1 : soundEnabled=True
+        EndIf
+        If soundBarAmount < 1 Then soundBarAmount = 5
+        If soundBarAmount > 5 Then soundBarAmount = 1
+        If soundEnabled=True Then DrawImageBox menu_bar, posX+764, posY+352, 0, 0, soundBarAmount * 17, 24
+        soundVolume = (soundBarAmount*100)/5
+        
+        // Set vsync setting.
+        If BoxOverlap(posX+745,posY+430,124,79,mx,my,1,1)
+            DrawImage menu_selection,posX+841,posY+481
+            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then vsyncSetting = Not vsyncSetting
+        EndIf
+        DrawObject(menu_txt_vsync,posX+807,posY+477,vsyncSetting)
+        
+        // Limit frame rate setting not changed by default.
+        limitFrameRateSettingChanged=False
+        
+        // Get current settings.
+        settingActive(1) = musicEnabled
+        settingActive(2) = soundEnabled
+        settingActive(3) = limitFrameRate
+        
+        // Toggle music, sound and vsync settings.
+        For i = 1 To 3
+            If BoxOverlap(posX+895,posY+222+(i-1)*110,54,54,mx,my,1,1)
+                DrawImage menu_item_select,posX+891,posY+218+(i-1)*110
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then 
+                    settingActive(i)=Not settingActive(i)
+                    If i=3 Then limitFrameRateSettingChanged=True // Limit frame rate setting changed.
+                EndIf
+            EndIf
+            DrawObject(menu_on_off,posX+922,posY+249+((i-1)*110),settingActive(i))
+        Next i
+        
+        // Set new current settings.
+        musicEnabled = settingActive(1)
+        soundEnabled = settingActive(2)
+        limitFrameRate = settingActive(3)
+        
+        // Apply limit frame rate setting if changed.
+        If limitFrameRateSettingChanged=True Then
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            If limitFrameRate=True Then
+                If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+                    If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
+                    If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
+                    If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+                Else
+                    If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+                EndIf
+            Else
+                If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+                    If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
+                    If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
+                    If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
+                Else
+                    If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
+                EndIf
+            EndIf
+            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            limitFrameRateSettingChanged=False
+        EndIf
+        
+        // Back button.
+        DrawImage menu_back,67,(sh-80)-(clampedPosY*0.5),backFrame
+        backFrame=0
+        If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1)
+            backFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                keyDelay=1
+                Gosub SaveSettings // Save settings.
+                mainMenuActive=True : settingsMenuActive=False
+            EndIf    
+        EndIf
+        
+        // Return to main menu with keyboard.
+        If (KeyHit(199) Or KeyHit(1)) And keyDelay=0 Then
+            keyDelay=1
+            Gosub SaveSettings // Save settings.
+            mainMenuActive=True : settingsMenuActive=False
+        
+        // Return to main menu with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+            keyDelay=1
+            Gosub SaveSettings // Save settings.
+            mainMenuActive=True : settingsMenuActive=False
+        EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ElseIf statsMenuActive=True Then
+        
+        DrawImage menu_stats,posX,posY
+        DrawObject(menu_txt_statistics,posX+512,(sh-50)-(clampedPosY*0.5))
+    
+        DrawImage menu_back,67,(sh-80)-(clampedPosY*0.5),backFrame
+        backFrame=0
+        If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1)
+            backFrame=1
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then mainMenuActive=True : statsMenuActive=False
+        EndIf
+        
+        // Rounds played.
+        roundsPlayedWidth=DrawDigit(totalRoundsPlayed,posX+77+30,posY+178,digits_large,1,20)
+        DrawObject(menu_rounds_played,posX+77+114+(roundsPlayedWidth-20)+30,posY+178)
+        
+        // Time played.
+        timePlayedWidth=DrawTimerDigit(totalPlayTime,posX+947-30,posY+178,digits_large,3,20,menu_colon)
+        DrawObject(menu_time_played,posX+947-146-(timePlayedWidth-50)-30,posY+178)
+        
+        // TOP 1-5.
+        For i=1 To 5
+            // Top list position number.
+            If topWins(i)>0 Or topLosses(i)>0 Then digitFont=digits_large Else digitFont=digits_large_dark
+            DrawDigit(i,posX+148+((i-1)*182),posY+242,digitFont,2,20)
+            
+            // Top player name.
+            If topWins(i)=0 And topLosses(i)=0 Then
+                topName(i)="-" : textColor=100
+            Else
+                textColor=255
+            EndIf
+            DrawText(posX+148+((i-1)*182), posY+287, topName(i), font_medium, 1, textColor)
+            
+            // Top craft and color.
+            If topWins(i)=0 And topLosses(i)=0 Then topColor(i)=6 // Display dimmed craft if not valid player.
+            DrawImage menu_craft_select,posX+98+((i-1)*182),posY+312,topColor(i)
+            
+            // Top wins.
+            If topWins(i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topWins(i),posX+122+((i-1)*182),posY+410,digitFont,2,14)
+            
+            // Top losses.
+            If topLosses(i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topLosses(i),posX+174+((i-1)*182),posY+410,digitFont,2,14)
+            
+            // Top accuracy.
+            If topAccuracy(i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topAccuracy(i),posX+148+((i-1)*182),posY+453,digitFont,2,14)
+            
+            // Top ratio (debug only).
+            If devMode=2 Then DrawText(posX+148+((i-1)*182), posY+480, topRatio(i), font_small, 1, 255)
+            
+            // Top enemy 1 name.
+            If topEnemyWins(1,i)=0 And topEnemyLosses(1,i)=0 Then
+                textColor=100 : topEnemyName(1,i)="-"
+            Else
+                textColor=255 : DrawImage menu_stats_enemy, posX+72+((i-1)*182), posY+491
+            EndIf
+            DrawText(posX+148+((i-1)*182), posY+507, topEnemyName(1,i), font_medium, 1, textColor)
+            
+            // Top enemy 1 wins.
+            If topEnemyWins(1,i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topEnemyWins(1,i),posX+92+((i-1)*182),posY+508,digitFont,2,14)
+            
+            // Top enemy 1 losses.
+            If topEnemyLosses(1,i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topEnemyLosses(1,i),posX+204+((i-1)*182),posY+508,digitFont,2,14)
+            
+            // Top enemy 2 name.
+            If topEnemyWins(2,i)=0 And topEnemyLosses(2,i)=0 Then
+                textColor=100 : topEnemyName(2,i)="-"
+            Else
+                textColor=255 : DrawImage menu_stats_enemy, posX+72+((i-1)*182), posY+543
+            EndIf
+            DrawText(posX+148+((i-1)*182), posY+559, topEnemyName(2,i), font_medium, 1, textColor)
+            
+            // Top enemy 2 wins.
+            If topEnemyWins(2,i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topEnemyWins(2,i),posX+92+((i-1)*182),posY+560,digitFont,2,14)
+            
+            // Top enemy 2 losses.
+            If topEnemyLosses(2,i)>0 Then digitFont=digits_medium Else digitFont=digits_medium_dark
+            DrawDigit(topEnemyLosses(2,i),posX+204+((i-1)*182),posY+560,digitFont,2,14)
+        Next i
+        
+        // Return to main menu with keyboard.
+        If (KeyHit(199) Or KeyHit(1)) And keyDelay=0 Then
+            keyDelay=1
+            mainMenuActive=True : statsMenuActive=False
+        
+        // Return to main menu with gamepad.
+        ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+            keyDelay=1
+            mainMenuActive=True : statsMenuActive=False
+        EndIf
+    
+    EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Reset key delay.
+    If keyDelay>0 Then keyDelay-1
+    If keyDelay=<0 Then keyDelay=0
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Check player name validity (trim and randomize name if somehow empty).
+// =====================================================================================================================================================================================================
+CheckPlayerNameValidity:
+
+    // Check and set random player name if empty.
+    For i = 1 To 3
+        pNickName(i) = Upper(Trim(pNickName(i))) // Trim all names in case of whitespace.
+        If Len(pNickName(i))=False Then
+            // If empty string then replace with random name.
+            If i=1 Then pNickName(i) = pName(Rand(0, 21))   // 0-21.
+            If i=2 Then pNickName(i) = pName(Rand(22, 43))  // 22-43.
+            If i=3 Then pNickName(i) = pName(Rand(44, 64))  // 44-64.
+        EndIf
+    Next i
+    
+    // Check player name overlapping and randomize if overlaps with existing name.
+    If pNameActive(1)=True And (pNickName(1) = pNickName(2) Or pNickName(1) = pNickName(3)) Then pNickName(1) = pName(Rand(0, 21)) // Re-randomize if overlapping name.
+    If pNameActive(2)=True And (pNickName(2) = pNickName(1) Or pNickName(2) = pNickName(3)) Then pNickName(2) = pName(Rand(22, 43)) // Re-randomize if overlapping name.
+    If pNameActive(3)=True And (pNickName(3) = pNickName(1) Or pNickName(3) = pNickName(2)) Then pNickName(3) = pName(Rand(44, 64)) // Re-randomize if overlapping name.
+    
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Save multiplayer settings.
+// =====================================================================================================================================================================================================
+SaveMultiplayerSettings:
+
+    // Disable all player name input fields.
+    For i = 1 To 3
+        pNameActive(i)=False // Set all name input fields disabled.
+    Next i
+    
+    // Make sure craft colors are correct before saving.
+    craftColor(1) = P1_craftFrame : craftColor(2) = P2_craftFrame : craftColor(3) = P3_craftFrame
+    
+    // Save multiplayer settings.
+    f=OpenToWrite("Data\Multiplayer.dat")
+    
+        For i=1 To 3
+            WriteLine f,pNickName(i)
+            WriteLine f,craftColor(i)
+        Next i
+        
+        For i=1 To 6
+            WriteLine f,weaponActive(i)
+        Next i
+        
+        For i=1 To 6
+            WriteLine f,toolActive(i)
+        Next i
+        
+        For i=1 To 6
+            WriteLine f,otherActive(i)
+        Next i
+        
+        WriteLine f,roundAmount
+        WriteLine f,playerAmount
+        WriteLine f,playerArmor
+        WriteLine f,playerSpeed
+        WriteLine f,playerDrag
+        WriteLine f,weaponAmmo
+        WriteLine f,weaponBarAmount
+        WriteLine f,toolBarAmount
+        WriteLine f,otherBarAmount
+        
+    CloseFile f
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Save settings.
+// =====================================================================================================================================================================================================
+SaveSettings:
+
+    // Save settings.
+    f=OpenToWrite("Data\Settings.dat")
+    
+        WriteLine f,musicEnabled
+        WriteLine f,soundEnabled
+        WriteLine f,musicBarAmount
+        WriteLine f,soundBarAmount
+        WriteLine f,vsyncSetting
+        WriteLine f,limitFrameRate
+        
+        For i=1 To 3
+            WriteLine f,craftKeybind(i)
+        Next i
+        
+        For i=1 To 3
+            WriteLine f,craftGamepad(i)
+        Next i
+        
+    CloseFile f
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get input hit.
+// =====================================================================================================================================================================================================
+CheckInputHit:
+
+    If statsActive=False And gamePaused=False Then
+        
+        isInputHit=False
+        
+        If KeyHit(28) Or KeyHit(156) Then
+            isInputHit=True
+        ElseIf gamepadSupport=True Then
+            If mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True Then
+                isInputHit = XInputXButton(mainGamepad)
+                
+                // Save gamepad input hit state and falsify repeated (hold) input.
+                If isInputHit=True Then
+                    If isInputHit=wasGamepadInputHit Then
+                        isInputHit=False
+                    EndIf
+                    wasGamepadInputHit=True
+                Else
+                    wasGamepadInputHit=False
+                EndIf
+            EndIf
+        EndIf
+    
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================

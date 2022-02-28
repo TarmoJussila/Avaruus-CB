@@ -1,0 +1,49 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - GameReset
+// =====================================================================================================================================================================================================
+GameReset:
+
+    // Reset item ID:s and item amounts back to normal.
+    For p = 1 To 3
+        craftShotsFired(p,1)=0 // Round craft shots fired to zero.
+        craftShotsHit(p,1)=0 // Round craft shots hit to zero.
+        For i = 0 To 17
+            collectedItems(p,i,0)=i // Item ID:s back to default values.
+            collectedItems(p,i,1)=0 // Round: Collected item amounts to zero.
+        Next i
+    Next p
+    
+    // Delete all floating particles ...
+    For iPart.PARTICLE = Each PARTICLE
+        iPart\lifespan=0
+    Next iPart
+    
+    // ... and bullets before next round.
+    For iBullet.BULLET = Each BULLET
+        iBullet\lifespan=0
+    Next iBullet
+    
+    playersAlive = playerAmount // At the start of the round every player is alive.
+    
+    // Reset crafts once new rounds is about to start.
+    Gosub CraftReset
+    
+    roundDurationTimer=Timer() // Zero round time.
+    roundDuration=0 // Round duration to zero.
+    startupNumber=Timer() // Zero startup counter time.
+    roundStart=Timer() // Zero this, so player names are displayed on screen.
+    itemFreqTimer=Timer() // Zero this so items can't be immediately on screen.
+    
+    // Reset items before new round begins.
+    For iItem.ITEM = Each ITEM
+        iItem\lifespan = 0
+    Next iItem
+    
+    sortTopItems=0 // Top items not sorted.
+    scoreAdded=0 // Score not added.
+    winner=0 // The next round is a draw until proven otherwise.
+    statsActive=0 // Round stats not active.
+     
+Return
+
+// =====================================================================================================================================================================================================

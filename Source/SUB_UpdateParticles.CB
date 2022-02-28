@@ -1,0 +1,65 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateParticles
+// =====================================================================================================================================================================================================
+UpdateParticles:
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    For iPart.PARTICLE = Each PARTICLE
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If gamePaused=False Then
+            iPart\x = iPart\x + Cos(iPart\angle) * PxPerSec(iPart\speed*100)
+            iPart\y = iPart\y + Sin(iPart\angle) * PxPerSec(iPart\speed*100)
+        EndIf    
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Crossing the screen border.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            
+        // Particle returns from the opposite side.
+        If iPart\x>sw+10 Then
+            iPart\lifespan-1
+            iPart\x=-10
+            
+        ElseIf iPart\x<-10 Then
+            iPart\lifespan-1
+            iPart\x=sw+10
+            
+        ElseIf iPart\y>sh+10 Then
+            iPart\lifespan-1
+            iPart\y=-10
+            
+        ElseIf iPart\y<-10 Then
+            iPart\lifespan-1
+            iPart\y=sh+10
+        EndIf
+        
+        If Timer()>iPart\frameChangeTimer+iPart\frameChangeSpeed And gamePaused=False Then
+            If partFrameDirection=0 Then
+                iPart\frame=iPart\frame-1
+            ElseIf partFrameDirection = 1
+                iPart\frame=iPart\frame+1
+            EndIf
+            iPart\frameChangeTimer=Timer()
+        EndIf
+        
+        // Limit sprite limit to 24 images, first image is 0.
+        If iPart\frame < 0 Then iPart\frame = 23
+        If iPart\frame > 23 Then iPart\frame = 0
+    
+        If iPart\lifespan>0 Then DrawObject(iPart\obj,iPart\x,iPart\y,iPart\frame)
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Delete parts with zero lifespan.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If iPart\lifespan=<0 Then
+            DeleteImage iPart\obj
+            Delete iPart
+        EndIf
+            
+    Next iPart
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Return 
+// =====================================================================================================================================================================================================

@@ -1,0 +1,242 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - LoadAssets
+// =====================================================================================================================================================================================================
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load background image. Resize to screen and set random mirroring.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+mirrorVertical=Rand(0,1) : mirrorHorizontal=Rand(0,1)
+If mirrorVertical=0 Then mirrorVertical=-1
+If mirrorHorizontal=0 Then mirrorHorizontal=-1
+
+DefaultMask ON,255,0,255 // Magenta mask ON.
+background_1        = LoadImage     ("Data\Gfx\background.png")
+Smooth2D ON : ResizeImage background_1,gameSW*mirrorVertical,gameSH*mirrorHorizontal : Smooth2D OFF
+DefaultMask OFF // Magenta mask OFF.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load menu assets.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+menu_logo           = LoadImage     ("Data\Gfx\menu_logo.png")
+
+menu_cursor         = LoadImage     ("Data\Gfx\menu_cursor.png")
+
+menu_selection      = LoadImage     ("Data\Gfx\menu_selection.png")
+menu_corner         = LoadImage     ("Data\Gfx\menu_corner.png")
+
+menu_main           = LoadImage     ("Data\Gfx\menu_main.png")
+menu_intro          = LoadImage     ("Data\Gfx\menu_intro.png")
+menu_multi          = LoadImage     ("Data\Gfx\menu_multi.png")
+menu_settings       = LoadImage     ("Data\Gfx\menu_settings.png")
+menu_stats          = LoadImage     ("Data\Gfx\menu_stats.png")
+
+menu_multi_p0       = LoadImage     ("Data\Gfx\menu_multi_p0.png")
+menu_multi_p1       = LoadImage     ("Data\Gfx\menu_multi_p1.png")
+menu_multi_p2       = LoadImage     ("Data\Gfx\menu_multi_p2.png")
+menu_multi_p3       = LoadImage     ("Data\Gfx\menu_multi_p3.png")
+menu_multi_active   = LoadImage     ("Data\Gfx\menu_multi_active.png")
+
+menu_arrow_left     = LoadImage     ("Data\Gfx\menu_arrow_left.png")
+menu_arrow_right    = LoadImage     ("Data\Gfx\menu_arrow_right.png")
+menu_bar            = LoadImage     ("Data\Gfx\menu_bar.png")
+menu_bar_small      = LoadImage     ("Data\Gfx\menu_bar_small.png")
+menu_player_select  = LoadAnimImage ("Data\Gfx\menu_player_select.png"  ,36,36,0,2)
+menu_item_select    = LoadImage     ("Data\Gfx\menu_item_select.png")
+menu_item_crossed   = LoadImage     ("Data\Gfx\menu_item_crossed.png")
+menu_name_select    = LoadImage     ("Data\Gfx\menu_name_select.png")
+menu_items          = LoadAnimImage ("Data\Gfx\menu_items.png"          ,72,64,0,19)
+menu_slash          = LoadImage     ("Data\Gfx\menu_slash.png")
+menu_on_off         = LoadAnimImage ("Data\Gfx\menu_on_off.png"         ,42,14,0,2)
+menu_txt_vsync      = LoadAnimImage ("Data\Gfx\menu_txt_vsync.png"      ,84,26,0,2)
+menu_stats_enemy    = LoadImage     ("Data\Gfx\menu_stats_enemy.png")
+
+menu_current_round  = LoadImage     ("Data\Gfx\menu_current_round.png")
+menu_txt_game_paused= LoadImage     ("Data\Gfx\menu_txt_game_paused.png")
+
+menu_txt_main_menu  = LoadImage     ("Data\Gfx\menu_txt_main_menu.png")
+menu_txt_multiplayer= LoadImage     ("Data\Gfx\menu_txt_multiplayer.png")
+menu_txt_settings   = LoadImage     ("Data\Gfx\menu_txt_settings.png")
+menu_txt_statistics = LoadImage     ("Data\Gfx\menu_txt_statistics.png")
+menu_txt_info       = LoadImage     ("Data\Gfx\menu_txt_info.png")
+menu_txt_roundover  = LoadImage     ("Data\Gfx\menu_txt_roundover.png")
+menu_txt_matchover  = LoadImage     ("Data\Gfx\menu_txt_matchover.png")
+
+menu_info           = LoadAnimImage ("Data\Gfx\menu_info.png"           ,210,60,0,2)
+menu_exit           = LoadAnimImage ("Data\Gfx\menu_exit.png"           ,210,60,0,2)
+menu_back           = LoadAnimImage ("Data\Gfx\menu_back.png"           ,210,60,0,2)
+menu_play           = LoadAnimImage ("Data\Gfx\menu_play.png"           ,210,60,0,2)
+menu_continue       = LoadAnimImage ("Data\Gfx\menu_continue.png"       ,210,60,0,2)
+menu_endmatch       = LoadAnimImage ("Data\Gfx\menu_endmatch.png"       ,210,60,0,2)
+menu_nextround      = LoadAnimImage ("Data\Gfx\menu_nextround.png"      ,210,60,0,2)
+
+menu_info_tj        = LoadImage     ("Data\Gfx\menu_info_tj.png")
+menu_info_jh        = LoadImage     ("Data\Gfx\menu_info_jh.png")
+menu_info_code      = LoadImage     ("Data\Gfx\menu_info_code.png")
+menu_info_music     = LoadImage     ("Data\Gfx\menu_info_music.png")
+
+menu_settings_controls=LoadAnimImage("Data\Gfx\menu_settings_controls.png",100,64,0,4)
+menu_settings_move  = LoadAnimImage ("Data\Gfx\menu_settings_move.png"  ,100,28,0,5)
+menu_settings_shoot = LoadAnimImage ("Data\Gfx\menu_settings_shoot.png" ,100,28,0,5)
+menu_txt_move       = LoadAnimImage ("Data\Gfx\menu_txt_move.png"       ,100,14,0,2)
+menu_txt_shoot      = LoadAnimImage ("Data\Gfx\menu_txt_shoot.png"      ,100,14,0,2)
+menu_txt_pad        = LoadImage     ("Data\Gfx\menu_txt_pad.png")
+menu_gamepad_state  = LoadAnimImage ("Data\Gfx\menu_gamepad_state.png"  ,24,24,0,3)
+
+menu_rounds_played  = LoadImage     ("Data\Gfx\menu_rounds_played.png")
+menu_time_played    = LoadImage     ("Data\Gfx\menu_time_played.png")
+
+menu_craft_select   = LoadAnimImage ("Data\Gfx\menu_craft_select.png"   ,100,80,0,7)
+menu_craft_select_1 = CloneImage    (menu_craft_select)
+menu_craft_select_2 = CloneImage    (menu_craft_select)
+menu_craft_select_3 = CloneImage    (menu_craft_select)
+
+menu_divider_left   = LoadImage     ("Data\Gfx\menu_divider_left.png")
+menu_divider_right  = LoadImage     ("Data\Gfx\menu_divider_right.png")
+menu_divider        = LoadImage     ("Data\Gfx\menu_divider.png")
+ResizeImage menu_divider,gameSW-100,ImageHeight(menu_divider)
+
+round_stats_two     = LoadImage     ("Data\Gfx\menu_stats_two.png")
+round_stats_three   = LoadImage     ("Data\Gfx\menu_stats_three.png")
+round_stats_crafts  = LoadAnimImage ("Data\Gfx\menu_stats_crafts.png"  ,150,120,0,6)
+round_stats_crafts_1= CloneImage    (round_stats_crafts)
+round_stats_crafts_2= CloneImage    (round_stats_crafts)
+round_stats_crafts_3= CloneImage    (round_stats_crafts)
+
+round_end_of_round  = LoadImage     ("Data\Gfx\menu_end_of_round.png")
+round_trophy        = LoadImage     ("Data\Gfx\menu_trophy_large.png")
+round_skull         = LoadImage     ("Data\Gfx\menu_skull_large.png")
+round_draw          = LoadImage     ("Data\Gfx\menu_draw.png")
+
+now_playing         = LoadImage     ("Data\Gfx\now_playing.png")
+
+DefaultMask ON,255,0,255 // Magenta mask ON.
+digits_small        = LoadAnimImage ("Data\Gfx\digits_small.png"        ,10,10,0,10)
+digits_small_red    = LoadAnimImage ("Data\Gfx\digits_small_red.png"    ,10,10,0,10)
+digits_small_dark   = LoadAnimImage ("Data\Gfx\digits_small_dark.png"   ,10,10,0,10)
+digits_medium       = LoadAnimImage ("Data\Gfx\digits_medium.png"       ,14,14,0,10)
+digits_medium_dark  = LoadAnimImage ("Data\Gfx\digits_medium_dark.png"  ,14,14,0,10)
+digits_large        = LoadAnimImage ("Data\Gfx\digits_large.png"        ,20,20,0,10)
+digits_large_dark   = LoadAnimImage ("Data\Gfx\digits_large_dark.png"   ,20,20,0,10)
+digits_huge         = LoadAnimImage ("Data\Gfx\digits_huge.png"         ,30,30,0,10)
+digits_humongous    = LoadAnimImage ("Data\Gfx\digits_humongous.png"    ,63,63,0,10)
+digits_startup      = LoadAnimImage ("Data\Gfx\digits_startup.png"      ,38,38,0,3)
+menu_colon          = LoadAnimImage ("Data\Gfx\menu_colon.png"          ,9,18,0,2)
+menu_multiplier     = LoadAnimImage ("Data\Gfx\menu_multiplier.png"     ,9,9,0,2)
+menu_dot            = LoadAnimImage ("Data\Gfx\menu_dot.png"            ,9,9,0,2)
+menu_line           = LoadImage     ("Data\Gfx\menu_line.png")
+item_switch         = LoadAnimImage ("Data\Gfx\item_switch.png"         ,60,10,0,18)
+DefaultMask OFF // Magenta mask OFF.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load bonus assets.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+menu_intro_bonus    = LoadImage     ("Data\Gfx\menu_intro_bonus.png")
+menu_fan_bonus      = LoadAnimImage ("Data\Gfx\menu_fan_bonus.png"      ,64,64,0,4)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load in-game assets.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+item_bishooter      = LoadAnimImage ("Data\Gfx\item_bishooter.png"      ,32,32,0,24)
+item_shotgun        = LoadAnimImage ("Data\Gfx\item_shotgun.png"        ,32,32,0,24)
+item_machinegun     = LoadAnimImage ("Data\Gfx\item_machinegun.png"     ,32,32,0,24)
+item_bazooka        = LoadAnimImage ("Data\Gfx\item_bazooka.png"        ,32,32,0,24)
+item_spreader       = LoadAnimImage ("Data\Gfx\item_spreader.png"       ,32,32,0,24)
+item_mine           = LoadAnimImage ("Data\Gfx\item_mine.png"           ,32,32,0,24)
+item_mine_armed     = LoadAnimImage ("Data\Gfx\item_mine_armed.png"     ,32,32,0,24)
+
+item_repair         = LoadAnimImage ("Data\Gfx\item_repair.png"         ,32,32,0,24)
+item_turbo          = LoadAnimImage ("Data\Gfx\item_turbo.png"          ,32,32,0,24)
+item_paint          = LoadAnimImage ("Data\Gfx\item_paint.png"          ,32,32,0,24)
+item_sandglass      = LoadAnimImage ("Data\Gfx\item_sandglass.png"      ,32,32,0,24)
+item_shield         = LoadAnimImage ("Data\Gfx\item_shield.png"         ,32,32,0,24)
+item_magnet         = LoadAnimImage ("Data\Gfx\item_magnet.png"         ,32,32,0,24)
+
+item_whiskey        = LoadAnimImage ("Data\Gfx\item_whiskey.png"        ,32,32,0,24)
+item_shocker        = LoadAnimImage ("Data\Gfx\item_shocker.png"        ,32,32,0,24)
+item_melon          = LoadAnimImage ("Data\Gfx\item_melon.png"          ,32,32,0,24)
+item_banana         = LoadAnimImage ("Data\Gfx\item_banana.png"         ,32,32,0,24)
+item_pineapple      = LoadAnimImage ("Data\Gfx\item_pineapple.png"      ,32,32,0,24)
+item_eggplant       = LoadAnimImage ("Data\Gfx\item_eggplant.png"       ,32,32,0,24)
+
+part_banana         = LoadAnimImage ("Data\Gfx\part_banana.png"         ,32,32,0,24)
+part_melon          = LoadAnimImage ("Data\Gfx\part_melon.png"          ,32,32,0,24)
+part_pineapple      = LoadAnimImage ("Data\Gfx\part_pineapple.png"      ,32,32,0,24)
+part_eggplant       = LoadAnimImage ("Data\Gfx\part_eggplant.png"       ,32,32,0,24)
+part_craft_1        = LoadAnimImage ("Data\Gfx\part_craft_1.png"        ,32,32,0,24)
+part_craft_2        = LoadAnimImage ("Data\Gfx\part_craft_2.png"        ,32,32,0,24)
+part_craft_3        = LoadAnimImage ("Data\Gfx\part_craft_3.png"        ,32,32,0,24)
+part_craft_4        = LoadAnimImage ("Data\Gfx\part_craft_4.png"        ,32,32,0,24)
+part_craft_5        = LoadAnimImage ("Data\Gfx\part_craft_5.png"        ,32,32,0,24)
+part_general        = LoadAnimImage ("Data\Gfx\part_general.png"        ,32,32,0,24)
+
+craft_1             = LoadAnimImage ("Data\Gfx\craft_grey.png"          ,64,64,0,24)
+craft_2             = LoadAnimImage ("Data\Gfx\craft_purple.png"        ,64,64,0,24)
+craft_3             = LoadAnimImage ("Data\Gfx\craft_yellow.png"        ,64,64,0,24)
+craft_4             = LoadAnimImage ("Data\Gfx\craft_green.png"         ,64,64,0,24)
+craft_5             = LoadAnimImage ("Data\Gfx\craft_red.png"           ,64,64,0,24)
+craft_6             = LoadAnimImage ("Data\Gfx\craft_blue.png"          ,64,64,0,24)
+craft_hit           = LoadAnimImage ("Data\Gfx\craft_hit.png"           ,64,64,0,24)
+
+ammo_basic          = LoadImage     ("Data\Gfx\ammo_basic.png")
+ammo_bazooka        = LoadAnimImage ("Data\Gfx\ammo_bazooka.png"        ,32,32,0,24)
+shield              = LoadImage     ("Data\Gfx\shield.png")
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load sound assets.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+snd_gun_shooter     = LoadSound     ("Data\Sfx\snd_weapon_shooter.ogg")
+snd_gun_bishooter   = LoadSound     ("Data\Sfx\snd_weapon_bishooter.ogg")
+snd_gun_shotgun     = LoadSound     ("Data\Sfx\snd_weapon_shotgun.ogg")
+snd_gun_machinegun  = LoadSound     ("Data\Sfx\snd_weapon_machinegun.ogg")
+snd_gun_bazooka     = LoadSound     ("Data\Sfx\snd_weapon_bazooka.ogg")
+snd_gun_spreader    = LoadSound     ("Data\Sfx\snd_weapon_spreader.ogg")
+
+snd_pickup_general  = LoadSound     ("Data\Sfx\snd_pickup_general.ogg")
+snd_pickup_bishooter= LoadSound     ("Data\Sfx\snd_pickup_bishooter.ogg")
+snd_pickup_shotgun  = LoadSound     ("Data\Sfx\snd_pickup_shotgun.ogg")
+snd_pickup_machinegun=LoadSound     ("Data\Sfx\snd_pickup_machinegun.ogg")
+snd_pickup_bazooka  = LoadSound     ("Data\Sfx\snd_pickup_bazooka.ogg")
+snd_pickup_spreader = LoadSound     ("Data\Sfx\snd_pickup_spreader.ogg")
+
+snd_fruit_1         = LoadSound     ("Data\Sfx\snd_item_fruit_1.ogg")
+snd_fruit_2         = LoadSound     ("Data\Sfx\snd_item_fruit_2.ogg")
+snd_fruit_3         = LoadSound     ("Data\Sfx\snd_item_fruit_3.ogg")
+snd_fruit_4         = LoadSound     ("Data\Sfx\snd_item_fruit_4.ogg")
+snd_repair          = LoadSound     ("Data\Sfx\snd_item_repair.ogg")
+snd_shield          = LoadSound     ("Data\Sfx\snd_item_shield.ogg")
+snd_shield_reverse  = LoadSound     ("Data\Sfx\snd_item_shield_reverse.ogg")
+snd_turbo           = LoadSound     ("Data\Sfx\snd_item_turbo.ogg")
+snd_turbo_reverse   = LoadSound     ("Data\Sfx\snd_item_turbo_reverse.ogg")
+snd_whiskey         = LoadSound     ("Data\Sfx\snd_item_whiskey.ogg")
+snd_whiskey_reverse = LoadSound     ("Data\Sfx\snd_item_whiskey_reverse.ogg")
+snd_item_time       = LoadSound     ("Data\Sfx\snd_item_time.ogg")
+snd_item_shocker    = LoadSound     ("Data\Sfx\snd_item_shocker.ogg")
+snd_item_paint      = LoadSound     ("Data\Sfx\snd_item_paint.ogg")
+snd_item_magnet     = LoadSound     ("Data\Sfx\snd_item_magnet.ogg")
+
+snd_hit_1           = LoadSound     ("Data\Sfx\snd_hit_1.ogg")
+snd_hit_2           = LoadSound     ("Data\Sfx\snd_hit_2.ogg")
+snd_hit_3           = LoadSound     ("Data\Sfx\snd_hit_3.ogg")
+snd_hit_bazooka     = LoadSound     ("Data\Sfx\snd_hit_bazooka.ogg")
+snd_hit_glass       = LoadSound     ("Data\Sfx\snd_hit_glass.ogg")
+snd_hit_shield      = LoadSound     ("Data\Sfx\snd_hit_shield.ogg")
+snd_collision_1     = LoadSound     ("Data\Sfx\snd_collision_1.ogg")
+snd_collision_2     = LoadSound     ("Data\Sfx\snd_collision_2.ogg")
+
+snd_explosion_1     = LoadSound     ("Data\Sfx\snd_explosion_1.ogg")
+snd_explosion_2     = LoadSound     ("Data\Sfx\snd_explosion_2.ogg")
+snd_explosion_3     = LoadSound     ("Data\Sfx\snd_explosion_3.ogg")
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Load font assets.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+font_small          = LoadFont      ("fixedsys",12)
+font_medium         = LoadFont      ("fixedsys",24)
+
+// =====================================================================================================================================================================================================

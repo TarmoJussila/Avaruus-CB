@@ -1,0 +1,245 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Functions - Misc Functions
+// =====================================================================================================================================================================================================
+
+// =====================================================================================================================================================================================================
+// Get screen mode support.
+// =====================================================================================================================================================================================================
+Function GetScreenModeSupport(checkScreenWidth,checkScreenHeight)
+
+    isSettingSupported=True
+
+    If GFXModeExists(checkScreenWidth,checkScreenHeight,16)=False And GFXModeExists(checkScreenWidth,checkScreenHeight,32)=False Then
+        isSettingSupported=False
+    Else
+        isSettingSupported=True
+    EndIf
+    
+    Return isSettingSupported
+    
+EndFunction
+
+// =====================================================================================================================================================================================================
+// Draw an image in the center of an object.
+// =====================================================================================================================================================================================================
+Function DrawObject(objName,objX,objY,objFrame=0)
+
+    DrawImage objName,objX-ImageWidth(objName)/2,objY-ImageHeight(objName)/2,objFrame,1
+    
+EndFunction
+
+// =====================================================================================================================================================================================================
+// Draw digit with the game's own font.
+// =====================================================================================================================================================================================================
+Function DrawDigit(variable,x,y,fontFile,align,kerning)
+    
+    variable = Min(variable,9999)
+
+    // Let's separate the numbers.
+    digit_xxxx=variable/1000 // Thousands (XXXX).
+    digit_xxx=(variable-(digit_xxxx*1000))/100 // Hundreds (XXX).
+    digit_xx=(variable-(digit_xxxx*1000)-(digit_xxx*100))/10 // Tens (XX).
+    digit_x=(variable-(digit_xxxx*1000)-(digit_xxx*100)-(digit_xx*10)) // Ones (X).
+
+    // Digit alignment choices.
+    If align=1 // Align to left.
+        If variable=>1000
+            center=0
+        ElseIf variable=>100
+            center=-kerning*1
+        ElseIf variable=>10
+            center=-kerning*2
+        ElseIf variable=>0
+            center=-kerning*3
+        EndIf
+    ElseIf align=2 // Align to center.
+        If variable=>1000
+            center=-kerning*1.5
+        ElseIf variable=>100
+            center=-kerning*2
+        ElseIf variable=>10
+            center=-kerning*2.5
+        ElseIf variable=>0
+            center=-kerning*3
+        EndIf       
+    ElseIf align=3 // Align to right.
+        center=-kerning*3
+    EndIf
+    
+    // Use DrawObject function to draw digits on screen.
+    If variable=>1000
+        DrawObject(fontFile,center+x,y,digit_xxxx) : width=width+kerning
+    EndIf
+    If variable=>100
+        DrawObject(fontFile,center+x+kerning,y,digit_xxx) : width=width+kerning
+    EndIf
+    If variable=>10
+        DrawObject(fontFile,center+x+kerning*2,y,digit_xx) : width=width+kerning
+    EndIf
+    If variable=>0
+        DrawObject(fontFile,center+x+kerning*3,y,digit_x) : width=width+kerning
+    EndIf
+    
+    Return width // Return digit width.
+    
+End Function
+
+// =====================================================================================================================================================================================================
+// Draw timer digit with the game's own font.
+// =====================================================================================================================================================================================================
+Function DrawTimerDigit(variable,x,y,fontFile,align,kerning,separator)
+
+    align=3 // Force align always to 3 (right).
+    
+    hours=variable/3600
+    minutes=(variable-(hours*3600))/60
+    seconds=(variable-(hours*3600)-(minutes*60))
+
+    spacing=kerning/2 // Spacing between hours/minutes/seconds.
+    separatorSpacing=Int(kerning/4.5) // Additional spacing for separator.
+    
+    DrawObject(separator,x-(kerning*2)+separatorSpacing,y)
+    If hours>0 Then DrawObject(separator,x-(kerning*4)-spacing+separatorSpacing,y)
+    
+    If hours>0 And minutes<10 Then DrawDigit("0",x-(kerning*3)-spacing,y,fontFile,align,kerning)
+    If seconds<10 Then DrawDigit("0",x-kerning,y,fontFile,align,kerning)
+    
+    If hours>0 Then DrawDigit(hours,x-(kerning*4)-(spacing*2),y,fontFile,align,kerning)
+    DrawDigit(minutes,x-(kerning*2)-spacing,y,fontFile,align,kerning)
+    DrawDigit(seconds,x,y,fontFile,align,kerning)
+    
+    width=kerning*2+spacing // Base width.
+    
+    If minutes>=10 Or hours>0 Then width=width+kerning
+    If hours>0 Then width=width+kerning+spacing
+    If hours>=10 Then width=width+kerning
+    If hours>=100 Then width=width+kerning
+    If hours>=1000 Then width=width+kerning
+    
+    Return width // Return timer digit width.
+    
+End Function
+                
+// =====================================================================================================================================================================================================
+// Draw text with kerning and layout options.
+// =====================================================================================================================================================================================================
+Function DrawText(tX, tY, txt$, font, textAlign, z=255)
+
+    outline=True
+    kerning=False
+    centerAlign=2 // 2 = full center alignment.
+
+    txt$ = Upper(txt$)
+    origLen = Len(txt$)
+    posFix = 0
+    
+    If kerning=True And origLen>1
+        For i=1 To origLen-1
+            txt$ = StrInsert(txt$, i + posFix, " ")
+            posFix = posFix + 1
+        Next i
+    EndIf
+
+    tw=TextWidth(txt$)
+    SetFont font
+
+    If textAlign=0 Then // Align to left.
+    
+        If outline=True Then
+            Color 0,0,0
+            Text tX+1,tY,txt$ : Text tX-1,tY,txt$
+            Text tX,tY+1,txt$ : Text tX,tY-1,txt$
+        EndIf
+        Color z,z,z : Text tX,tY,txt$
+
+    ElseIf textAlign=1 Then // Align to middle.
+
+        If outline=True Then
+            Color 0,0,0
+            CenterText tX+1,tY,txt$,centerAlign : CenterText tX-1,tY,txt$,centerAlign
+            CenterText tX,tY+1,txt$,centerAlign : CenterText tX,tY-1,txt$,centerAlign
+        EndIf
+        Color z,z,z : CenterText tX,tY,txt$,centerAlign
+
+    ElseIf textAlign=2 // Align to right.
+
+        If outline=True Then
+            Color 0,0,0
+            Text tX+1-tw,tY,txt$ : Text tX-1-tw,tY,txt$
+            Text tX-tw,tY+1,txt$ : Text tX-tw,tY-1,txt$
+        EndIf
+        Color z,z,z : Text tX-tw,tY,txt$
+
+    EndIf
+
+EndFunction
+
+// =====================================================================================================================================================================================================
+// Get width of text made with DrawText
+// =====================================================================================================================================================================================================
+Function GetDrawTextWidth(txt$)
+
+    kerning=False
+
+    txt$ = Upper(txt$)
+    origLen = Len(txt$)
+    
+    If kerning=True And origLen > 1
+        For i=1 To origLen-1
+            txt$ = txt$ + " "
+        Next i
+    EndIf
+
+    Return TextWidth(txt$)
+
+EndFunction
+
+// =====================================================================================================================================================================================================
+// Constant game speed.
+// =====================================================================================================================================================================================================
+Function UpdateScreen(vsyncSetting)
+
+    If vsyncSetting<=0
+        DrawScreen ON,OFF   // Update screen with CPU.
+    ElseIf vsyncSetting>=1
+        DrawScreen ON,ON    // Update screen with GPU.
+    EndIf
+    
+EndFunction
+
+// =====================================================================================================================================================================================================
+// Constant game speed.
+// =====================================================================================================================================================================================================
+// Set game speed constant.
+Global g_frameTime As Float
+g_frameTime = 0.0
+
+Global g_tmpTime As Integer
+g_tmpTime = 0
+
+Global curTime
+
+// Return movement / pixel per second.
+Function PxPerSec(px#)
+    Return px# * g_frameTime
+End Function
+
+// Return degree / degree per seocnd.
+Function DgrPerSec(dgr#)
+    Return dgr# * g_frameTime
+End Function
+
+// Return frame time.
+Function FrameTime()
+    Return g_frameTime
+End Function
+
+// Update the frame timer.
+Function UpdateFrameTimer()
+    curTime = Timer()
+    If g_tmpTime = 0 Then g_tmpTime = curTime
+    g_frameTime = (curTime - g_tmpTime) / 1000.0
+    g_tmpTime = curTime
+End Function
+
+// =====================================================================================================================================================================================================

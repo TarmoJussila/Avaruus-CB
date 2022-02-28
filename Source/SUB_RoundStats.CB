@@ -1,0 +1,624 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - RoundStats
+// =====================================================================================================================================================================================================
+RoundStats:
+
+    // If no more players are alive or time is up, the round is over.
+    If playersAlive=<1 And menuActive=False Then
+        If Timer()>roundEndTime+2000 And gamePaused=False Then // 2 seconds time until round is finished.
+            
+            // Before inactivating the game, check who won (if anyone) and then destroy the craft.
+            For i = 1 To playerAmount
+                // Disable turbo, if still active in the end of round.
+                craftTurboActive(i)=False
+                craftShieldActive(i)=False
+                If craftWhiskeyActive(i)=True Then
+                    // Return controls back to normal.
+                    temp = craftRightKey(i)
+                    craftRightKey(i) = craftLeftKey(i)
+                    craftLeftKey(i) = temp
+                    // Disable whiskey.
+                    craftWhiskeyActive(i)=False
+                EndIf
+                
+                // Save the winners craft id before exploding all still-alive-crafts.
+                If craftAlive(i)=True And scoreAdded=False Then
+                    winner=craftId(i) // Save the winner craft id.
+                    If winner=1
+                        p1_wins=p1_wins+1 : p2_losses=p2_losses+1 : p3_losses=p3_losses+1
+                    ElseIf winner=2
+                        p2_wins=p2_wins+1 : p1_losses=p1_losses+1 : p3_losses=p3_losses+1
+                    ElseIf winner=3
+                        p3_wins=p3_wins+1 : p1_losses=p1_losses+1 : p2_losses=p2_losses+1
+                    EndIf
+                    craftArmor(i)=0 // Then explode the craft.
+                    matchDuration = matchDuration + roundDuration // Add round duration to total duration.
+                    scoreAdded=True
+                EndIf
+            Next i
+            
+            // If there were no survivors in the round, the round is a draw.
+            If scoreAdded=False Then // If score was not added, then there are no winners.
+                winner=0 // Nobody won, add one loss to every player.
+                p1_losses=p1_losses+1 : p2_losses=p2_losses+1 : p3_losses=p3_losses+1
+                scoreAdded=True
+            EndIf
+            
+            // Reset fruit sound amount counter (limit play sound events).
+            fruitSoundAmount=0 : fruitSoundLimit=3
+            
+            // Explode fruits & whiskey bottles if there are any left.
+            For iItem.ITEM = Each ITEM
+                If iItem\id=12 Or (iItem\id=>14 And iItem\id=<17) And iItem\lifespan>0 Then // If object is fruit or whiskey.
+                    For i = 1 To Rand(3,5)
+                        newPart.PARTICLE = New(PARTICLE)
+                        If iItem\id=12
+                            newPart\obj = CloneImage(part_pineapple) // NOTE: Whiskey bottle uses pineapple particles.
+                        ElseIf iItem\id=14
+                            newPart\obj = CloneImage(part_melon)
+                        ElseIf iItem\id=15
+                            newPart\obj = CloneImage(part_banana)
+                        ElseIf iItem\id=16
+                            newPart\obj = CloneImage(part_pineapple)
+                        ElseIf iItem\id=17
+                            newPart\obj = CloneImage(part_eggplant)
+                        EndIf
+                        newPart\angle = Rand(0,360)
+                        newPart\x = iItem\x
+                        newPart\y = iItem\y
+                        newPart\frame = Rand(0,23)
+                        newPart\speed = Rnd(0.2,2.0)
+                        newPart\frameDirection = Rand(0,1)
+                        newPart\frameChangeSpeed = Rand(20,100)
+                        newPart\lifespan = 1 // Lifespan is two screen passes.
+                    Next i
+                    
+                    // Play random fruit sound (if sound limit not reached).
+                    If (Not iItem\id=12) And fruitSoundAmount<fruitSoundLimit Then
+                        fruitSound=Rand(1,4) // Randomize which sound is played.
+                        If fruitSound=1
+                            PlaySound snd_fruit_1,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=2
+                            PlaySound snd_fruit_2,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=3
+                            PlaySound snd_fruit_3,soundVolume,0,Rand(40000,48000)
+                        ElseIf fruitSound=4
+                            PlaySound snd_fruit_4,soundVolume,0,Rand(40000,48000)    
+                        EndIf
+                        fruitSoundAmount+1
+                    // Play glass break sound for whiskey bottle.    
+                    ElseIf iItem\id=12
+                        PlaySound snd_hit_glass,soundVolume,0,Rand(40000,48000)
+                    EndIf
+                EndIf
+                iItem\lifespan=0
+            Next iItem
+            
+            // If last round then display total collected item amounts.
+            If currentRound < roundAmount // If not last round.
+                sortWhat=1 // 1: Sort round item amounts.
+            ElseIf currentRound = roundAmount // If last round.
+                sortWhat=2 // 2: Sort total item amounts.
+            EndIf
+            
+            // Sort round or match top items & sort collected item amounts.
+            If sortTopItems=False Then
+                For p = 1 To playerAmount
+                    For i = 0 To totalItemAmount-1
+                        For j = 0 To totalItemAmount-i-1
+                            If collectedItems(p,j,sortWhat) < collectedItems(p,j+1,sortWhat) Then
+                                // Collected item amounts.
+                                t1 = collectedItems(p,j,sortWhat)
+                                collectedItems(p,j,sortWhat) = collectedItems(p,j+1,sortWhat)
+                                collectedItems(p,j+1,sortWhat) = t1
+                                // Collected item ID:s.
+                                t2 = collectedItems(p,j,0)
+                                collectedItems(p,j,0) = collectedItems(p,j+1,0)
+                                collectedItems(p,j+1,0) = t2
+                            EndIf
+                        Next j
+                    Next i
+                Next p
+                sortTopItems=True
+            EndIf
+            
+            // Increase and save statistics to file.
+            Gosub SaveStatistics
+            
+            statsActive=True // Stats is active, cannot pause game during this etc.
+            gameActive=False // Let's make the gameplay inactive.
+            
+            Gosub CheckInputHit_Stats // Get input hit (stats).
+            
+            Gosub UpdatePointerPosition // Update pointer position.
+            If isPointerActive=False Then // Enable pointer (only once).
+                ShowMouse menu_cursor
+                isPointerActive=True
+            EndIf
+            
+            // Reduce particle lifespan to 1 if still alive.
+            For iPart.PARTICLE = Each PARTICLE
+                If iPart\lifespan>0
+                    iPart\lifespan=1
+                EndIf
+            Next iPart
+            
+            // Reduce bullet lifespan to 1 if still alive.
+            For iBullet.BULLET = Each BULLET
+                If iBullet\lifespan>0 Then
+                    // Set bullet lifespan to 1.
+                    iBullet\lifespan=1
+                    // Explode all mines.
+                    If iBullet\category=3 Then
+                        // Emit particles.
+                        For i = 1 To Rand(3,5)
+                            newPart.PARTICLE = New(PARTICLE)
+                            newPart\obj = CloneImage(part_general)
+                            newPart\angle = Rand(0,360)
+                            newPart\x = iBullet\x
+                            newPart\y = iBullet\y
+                            newPart\frame = Rand(0,23)
+                            newPart\speed = Rnd(1.0,2.0)
+                            newPart\frameDirection = Rand(0,1)
+                            newPart\frameChangeSpeed = Rand(20,100)
+                            newPart\lifespan = 1
+                        Next i
+                        iBullet\lifespan=0 // Mine lifespan to zero.
+                    EndIf
+                EndIf
+            Next iBullet
+            
+            // Round/match over text.
+            If currentRound < roundAmount // If not last round.
+                DrawObject(menu_txt_roundover,posX+512,(sh-50)-(clampedPosY*0.5))
+            ElseIf currentRound >= roundAmount // If last round.
+                DrawObject(menu_txt_matchover,posX+512,(sh-50)-(clampedPosY*0.5))
+            EndIf
+            
+            // Depending of player amount, draw the basis for stats.
+            If playerAmount=2 Then
+            
+                DrawImage round_stats_two,posX,posY
+                
+                DrawObject(round_stats_crafts_1,posX+372,posY+360,craftColor(1))
+                DrawObject(round_stats_crafts_2,posX+652,posY+360,craftColor(2))
+                
+                DrawText(posX+372, posY+230, pNickName(1), font_medium, 1, 255)
+                DrawText(posX+652, posY+230, pNickName(2), font_medium, 1, 255)
+                
+                // Player 1 statistics.
+                If p1_wins>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p1_wins,posX+317,posY+437,tempFont,1,20)
+                If p1_losses>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p1_losses,posX+427,posY+437,tempFont,3,20)
+                DrawDigit(craftShotsHit(1,sortWhat),posX+298,posY+263,digits_medium,1,14)
+                
+                If craftShotsHit(1,sortWhat) >= 100
+                    DrawObject(menu_slash,posX+298+22+28,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+298+40+28,posY+263,digits_small_dark,1,10)
+                ElseIf craftShotsHit(1,sortWhat) >= 10
+                    DrawObject(menu_slash,posX+298+22+14,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+298+40+14,posY+263,digits_small_dark,1,10)
+                Else
+                    DrawObject(menu_slash,posX+298+22,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+298+40,posY+263,digits_small_dark,1,10)
+                EndIf
+
+                DrawDigit(Int((Float(craftShotsHit(1,sortWhat))/Float(craftShotsFired(1,sortWhat)+0.001))*100.0),posX+446,posY+263,digits_medium,3,14)
+                
+                // Player 2 statistics. 
+                If p2_wins>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p2_wins,posX+597,posY+437,tempFont,1,20)
+                If p2_losses>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p2_losses,posX+707,posY+437,tempFont,3,20)
+                DrawDigit(craftShotsHit(2,sortWhat),posX+578,posY+263,digits_medium,1,14)
+                
+                If craftShotsHit(2,sortWhat) >= 100
+                    DrawObject(menu_slash,posX+578+22+28,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+578+40+28,posY+263,digits_small_dark,1,10)
+                ElseIf craftShotsHit(2,sortWhat) >= 10
+                    DrawObject(menu_slash,posX+578+22+14,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+578+40+14,posY+263,digits_small_dark,1,10)
+                Else
+                    DrawObject(menu_slash,posX+578+22,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+578+40,posY+263,digits_small_dark,1,10)
+                EndIf
+                
+                DrawDigit(Int((Float(craftShotsHit(2,sortWhat))/Float(craftShotsFired(2,sortWhat)+0.001))*100.0),posX+726,posY+263,digits_medium,3,14)
+                
+                For i = 0 To 2
+                    // Player 1 (left).
+                    If collectedItems(1,i,sortWhat) > 0
+                        DrawObject(menu_items,posX+300+(i*72),posY+521,collectedItems(1,i,0))
+                        DrawDigit(collectedItems(1,i,sortWhat),posX+300+(i*72),posY+567,digits_medium,2,14)
+                    EndIf
+                    // Player 2 (right).
+                    If collectedItems(2,i,sortWhat) > 0
+                        DrawObject(menu_items,posX+580+(i*72),posY+521,collectedItems(2,i,0))
+                        DrawDigit(collectedItems(2,i,sortWhat),posX+580+(i*72),posY+567,digits_medium,2,14)
+                    EndIf
+                Next i
+                
+            ElseIf playerAmount=3 Then
+            
+                DrawImage round_stats_three,posX,posY
+                
+                DrawObject(round_stats_crafts_1,posX+232,posY+350,craftColor(1))
+                DrawObject(round_stats_crafts_2,posX+512,posY+350,craftColor(2))
+                DrawObject(round_stats_crafts_3,posX+792,posY+350,craftColor(3))
+                
+                DrawText(posX+232, posY+230, pNickName(1), font_medium, 1, 255)
+                DrawText(posX+512, posY+230, pNickName(2), font_medium, 1, 255)
+                DrawText(posX+792, posY+230, pNickName(3), font_medium, 1, 255)
+                
+                // Player 1 statistics.
+                If p1_wins>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p1_wins,posX+177,posY+437,tempFont,1,20)
+                If p1_losses>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p1_losses,posX+287,posY+437,tempFont,3,20)
+                DrawDigit(craftShotsHit(1,sortWhat),posX+158,posY+263,digits_medium,1,14)
+                
+                If craftShotsHit(1,sortWhat) >= 100
+                    DrawObject(menu_slash,posX+158+22+28,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+158+40+28,posY+263,digits_small_dark,1,10)
+                ElseIf craftShotsHit(1,sortWhat) >= 10
+                    DrawObject(menu_slash,posX+158+22+14,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+158+40+14,posY+263,digits_small_dark,1,10)
+                Else
+                    DrawObject(menu_slash,posX+158+22,posY+263) : DrawDigit(craftShotsFired(1,sortWhat),posX+158+40,posY+263,digits_small_dark,1,10)
+                EndIf
+
+                DrawDigit(Int((Float(craftShotsHit(1,sortWhat))/Float(craftShotsFired(1,sortWhat)+0.001))*100.0),posX+306,posY+263,digits_medium,3,14)
+                
+                // Player 2 statistics. 
+                If p2_wins>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p2_wins,posX+457,posY+437,tempFont,1,20)
+                If p2_losses>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p2_losses,posX+567,posY+437,tempFont,3,20)
+                DrawDigit(craftShotsHit(2,sortWhat),posX+438,posY+263,digits_medium,1,14)
+                
+                If craftShotsHit(2,sortWhat) >= 100
+                    DrawObject(menu_slash,posX+438+22+28,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+438+40+28,posY+263,digits_small_dark,1,10)
+                ElseIf craftShotsHit(2,sortWhat) >= 10
+                    DrawObject(menu_slash,posX+438+22+14,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+438+40+14,posY+263,digits_small_dark,1,10)
+                Else
+                    DrawObject(menu_slash,posX+438+22,posY+263) : DrawDigit(craftShotsFired(2,sortWhat),posX+438+40,posY+263,digits_small_dark,1,10)
+                EndIf
+                
+                DrawDigit(Int((Float(craftShotsHit(2,sortWhat))/Float(craftShotsFired(2,sortWhat)+0.001))*100.0),posX+586,posY+263,digits_medium,3,14)
+                
+                // Player 3 statistics.
+                If p3_wins>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p3_wins,posX+737,posY+437,tempFont,1,20)
+                If p3_losses>0 Then tempFont=digits_large Else tempFont=digits_large_dark
+                DrawDigit(p3_losses,posX+847,posY+437,tempFont,3,20)
+                DrawDigit(craftShotsHit(3,sortWhat),posX+718,posY+263,digits_medium,1,14)
+                
+                If craftShotsHit(3,sortWhat) >= 100
+                    DrawObject(menu_slash,posX+718+22+28,posY+263) : DrawDigit(craftShotsFired(3,sortWhat),posX+718+40+28,posY+263,digits_small_dark,1,10)
+                ElseIf craftShotsHit(3,sortWhat) >= 10
+                    DrawObject(menu_slash,posX+718+22+14,posY+263) : DrawDigit(craftShotsFired(3,sortWhat),posX+718+40+14,posY+263,digits_small_dark,1,10)
+                Else
+                    DrawObject(menu_slash,posX+718+22,posY+263) : DrawDigit(craftShotsFired(3,sortWhat),posX+718+40,posY+263,digits_small_dark,1,10)
+                EndIf
+                
+                DrawDigit(Int((Float(craftShotsHit(3,sortWhat))/Float(craftShotsFired(3,sortWhat)+0.001))*100.0),posX+866,posY+263,digits_medium,3,14)
+                
+                For i = 0 To 2
+                    // Player 1 (left).
+                    If collectedItems(1,i,sortWhat) > 0 Then
+                        DrawObject(menu_items,posX+160+(i*72),posY+521,collectedItems(1,i,0))
+                        DrawDigit(collectedItems(1,i,sortWhat),posX+160+(i*72),posY+567,digits_medium,2,14)
+                    EndIf
+                    // Player 2 (center).
+                    If collectedItems(2,i,sortWhat) > 0 Then
+                        DrawObject(menu_items,posX+440+(i*72),posY+521,collectedItems(2,i,0))
+                        DrawDigit(collectedItems(2,i,sortWhat),posX+440+(i*72),posY+567,digits_medium,2,14)
+                    EndIf
+                    // Player 3 (right).
+                    If collectedItems(3,i,sortWhat) > 0 Then
+                        DrawObject(menu_items,posX+720+(i*72),posY+521,collectedItems(3,i,0))
+                        DrawDigit(collectedItems(3,i,sortWhat),posX+720+(i*72),posY+567,digits_medium,2,14)
+                    EndIf
+                Next i
+                
+            EndIf
+            
+            // Current round and total round amount.
+            If currentRound < roundAmount Then // If not last round.
+                DrawObject(round_end_of_round,posX+512,50+(clampedPosY*0.5))
+                DrawTimerDigit(roundDuration,sw-77,50+(clampedPosY*0.5),digits_large,3,20,menu_colon)
+            Else // If last round is over, then show match results.
+                DrawObject(round_end_of_round,posX+512,50+(clampedPosY*0.5))
+                DrawTimerDigit(matchDuration,sw-77,50+(clampedPosY*0.5),digits_large,3,20,menu_colon)
+                // If last round = show total match statistics & match winner.
+                If p1_wins > p2_wins And p1_wins > p3_wins Then
+                    winner=1
+                ElseIf p2_wins > p1_wins And p2_wins > p3_wins Then
+                    winner=2
+                ElseIf p3_wins > p1_wins And p3_wins > p2_wins Then
+                    winner=3
+                Else
+                    winner=0
+                EndIf
+            EndIf
+            DrawDigit(currentRound,posX+464,61+(clampedPosY*0.5),digits_large,3,20)
+            DrawDigit(roundAmount,posX+560,61+(clampedPosY*0.5),digits_large,1,20)
+            
+            // Declare the round / match results on screen.
+            If winner=0 Then // If the round / match was a draw.
+                DrawObject(round_draw,posX+512,posY+155)        // Draw (no winners).
+            ElseIf winner=1 Then
+                If playerAmount=2 Then
+                    DrawObject(round_trophy,posX+372,posY+163)  // P1: Trophy (winner).
+                    DrawObject(round_skull,posX+652,posY+163)   // P2: Skull.
+                ElseIf playerAmount=3 Then
+                    DrawObject(round_trophy,posX+232,posY+163)  // P1: Trophy (winner).
+                    DrawObject(round_skull,posX+512,posY+163)   // P2: Skull. TODO.
+                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull. TODO.
+                EndIf
+            ElseIf winner=2 Then
+                If playerAmount=2 Then
+                    DrawObject(round_skull,posX+372,posY+163)   // P1: Skull.
+                    DrawObject(round_trophy,posX+652,posY+163)  // P2: Trophy (winner).
+                ElseIf playerAmount=3 Then
+                    DrawObject(round_skull,posX+232,posY+163)   // P1: Skull. TODO.
+                    DrawObject(round_trophy,posX+512,posY+163)  // P2: Trophy (winner).
+                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull. TODO.
+                EndIf
+            ElseIf winner=3 Then
+                DrawObject(round_skull,posX+232,posY+163)       // P1: Skull. TODO.
+                DrawObject(round_skull,posX+512,posY+163)       // P2: Skull. TODO.
+                DrawObject(round_trophy,posX+792,posY+163)      // P3: Trophy (winner).
+            EndIf
+            
+            // Show the option to end match.
+            DrawImage menu_endmatch,67,(sh-80)-(clampedPosY*0.5),endmatchFrame
+            endmatchFrame=0
+            If BoxOverlap(70,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1) Then
+                endmatchFrame=1
+                If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                    Gosub ResetAndReturnToMainMenu : keyDelay=1
+                EndIf
+            EndIf
+            
+            // Show the option for next round.
+            If currentRound < roundAmount Then
+                // Start next round if the button is clicked.
+                DrawImage menu_nextround,sw-277,(sh-80)-(clampedPosY*0.5),nextroundFrame
+                nextroundFrame=0
+                If BoxOverlap(sw-124,(sh-77)-(clampedPosY*0.5),54,54,mx,my,1,1) Then
+                    nextroundFrame=1
+                    If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                        Gosub GameReset : currentRoundStatsSaved=False
+                        gameActive=True : keyDelay=1
+                        currentRound = currentRound + 1 // Let's update current round + 1.
+                    EndIf
+                EndIf
+                // Start next round with keyboard.
+                If (KeyHit(28) Or KeyHit(156) Or KeyHit(207)) And keyDelay=0 Then
+                    Gosub GameReset : currentRoundStatsSaved=False
+                    gameActive=True : keyDelay=1
+                    currentRound = currentRound + 1 // Let's update current round + 1.
+                
+                // Start next round with gamepad.
+                ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputStartButton(mainGamepad, True)=True And XInputBackButton(mainGamepad)=False And keyDelay=0 Then
+                    Gosub GameReset : currentRoundStatsSaved=False
+                    gameActive=True : keyDelay=1
+                    currentRound = currentRound + 1 // Let's update current round + 1.
+                EndIf
+            EndIf
+            
+            // Return to main menu with keyboard.
+            If (KeyHit(199) Or KeyHit(1)) And keyDelay=0 Then
+                keyDelay=1
+                Gosub ResetAndReturnToMainMenu
+            
+            // Return to main menu with gamepad.
+            ElseIf gamepadSupport=True And mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True And XInputBackButton(mainGamepad, True)=True And XInputStartButton(mainGamepad)=False And keyDelay=0 Then
+                keyDelay=1
+                Gosub ResetAndReturnToMainMenu
+            EndIf
+            
+        EndIf
+    Else
+        roundEndTime=Timer() // Zero timer that counts time when round is about to end.
+    EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Reset key delay.
+    If keyDelay>0 Then keyDelay-1
+    If keyDelay=<0 Then keyDelay=0
+
+Return 
+// =====================================================================================================================================================================================================
+// SUB: Return to main menu from stats menu (and reset game).
+// =====================================================================================================================================================================================================
+ResetAndReturnToMainMenu:
+
+    // Set player statistics to default.
+    For p = 1 To 3
+        craftShotsFired(p,2)=0 // Total craft shots fired to zero.
+        craftShotsHit(p,2)=0 // Total craft shots hit to zero.
+        For i = 0 To 17
+            collectedItems(p,i,2)=0 // Total collected item amounts to zero.
+        Next i
+    Next p
+    
+    // Reset game data.
+    Gosub GameReset : currentRoundStatsSaved=False
+    matchDuration=0
+    p1_wins=0 : p2_wins=0 : p3_wins=0 : p1_losses=0 : p2_losses=0 : p3_losses=0
+    nextroundFrame=0 : endmatchFrame=0
+
+    // Reset menu state.
+    gameActive=False : gamePaused=False : menuActive=True : mainMenuActive=True
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Save statistics.
+// =====================================================================================================================================================================================================
+SaveStatistics:
+
+    If currentRoundStatsSaved=False Then
+    
+        // Only set top list scores when match over (last round played).
+        If currentRound = roundAmount Then
+        
+            If playerAmount=2 Then p3_wins=0 : p3_losses=0 // Remove player 3 stats if only two players.
+        
+            // Add current round results to top list for sorting/comparison.
+            topName(6) = pNickName(1) : topColor(6) = craftColor(1) : topWins(6) = p1_wins : topLosses(6) = p1_losses : topAccuracy(6) = Int((Float(craftShotsHit(1,2))/Float(craftShotsFired(1,2)+0.001))*100.0)
+            topName(7) = pNickName(2) : topColor(7) = craftColor(2) : topWins(7) = p2_wins : topLosses(7) = p2_losses : topAccuracy(7) = Int((Float(craftShotsHit(2,2))/Float(craftShotsFired(2,2)+0.001))*100.0)
+            topName(8) = pNickName(3) : topColor(8) = craftColor(3) : topWins(8) = p3_wins : topLosses(8) = p3_losses : topAccuracy(8) = Int((Float(craftShotsHit(3,2))/Float(craftShotsFired(3,2)+0.001))*100.0)
+            
+            // Top enemy 1.
+            topEnemyName(1,6) = pNickName(2) : topEnemyWins(1,6) = p2_wins : topEnemyLosses(1,6) = p2_losses
+            topEnemyName(1,7) = pNickName(1) : topEnemyWins(1,7) = p1_wins : topEnemyLosses(1,7) = p1_losses
+            topEnemyName(1,8) = pNickName(1) : topEnemyWins(1,8) = p1_wins : topEnemyLosses(1,8) = p1_losses
+            
+            // Top enemy 2.
+            topEnemyName(2,6) = pNickName(3) : topEnemyWins(2,6) = p3_wins : topEnemyLosses(2,6) = p3_losses
+            topEnemyName(2,7) = pNickName(3) : topEnemyWins(2,7) = p3_wins : topEnemyLosses(2,7) = p3_losses
+            topEnemyName(2,8) = pNickName(2) : topEnemyWins(2,8) = p2_wins : topEnemyLosses(2,8) = p2_losses
+            
+            // Sort enemies. Enemy with more wins on top.
+            For i=6 To 8
+                If topEnemyWins(2,i) > topEnemyWins(1,i) Then
+                    // Sort names.
+                    topEnemyName(0,i) = topEnemyName(1,i)
+                    topEnemyName(1,i) = topEnemyName(2,i)
+                    topEnemyName(2,i) = topEnemyName(0,i)
+                    // Sort wins.
+                    topEnemyWins(0,i) = topEnemyWins(1,i)
+                    topEnemyWins(1,i) = topEnemyWins(2,i)
+                    topEnemyWins(2,i) = topEnemyWins(0,i)
+                    // Sort losses.
+                    topEnemyLosses(0,i) = topEnemyLosses(1,i)
+                    topEnemyLosses(1,i) = topEnemyLosses(2,i)
+                    topEnemyLosses(2,i) = topEnemyLosses(0,i)
+                EndIf
+            Next i
+            
+            // Calculate win/death ratio for each top list score and current round scores.
+            For i=1 To topListAmount+3
+                // Calculate top score: More wins and less losses equals better top list position. Better accuracy solves even cases.
+                topRatio(i) = Float(topWins(i))*1 - Float(topLosses(i))*0.1 + topAccuracy(i)*0.0001
+            Next i
+            
+            // Sort top scores by win/lose ratio.
+            For i = 1 To topListAmount+3
+                For j = 1 To topListAmount+3-i+1
+                    If topRatio(j) < topRatio(j+1) Then
+                        // Sort top ratio.
+                        s1# = topRatio(j)
+                        topRatio(j) = topRatio(j+1)
+                        topRatio(j+1) = s1#
+                        // Sort top name.
+                        s2$ = topName(j)
+                        topName(j) = topName(j+1)
+                        topName(j+1) = s2$
+                        // Sort top color.
+                        s3 = topColor(j)
+                        topColor(j) = topColor(j+1)
+                        topColor(j+1) = s3
+                        // Sort top wins.
+                        s4 = topWins(j)
+                        topWins(j) = topWins(j+1)
+                        topWins(j+1) = s4
+                        // Sort top losses.
+                        s5 = topLosses(j)
+                        topLosses(j) = topLosses(j+1)
+                        topLosses(j+1) = s5
+                        // Sort top accuracy.
+                        s6 = topAccuracy(j)
+                        topAccuracy(j) = topAccuracy(j+1)
+                        topAccuracy(j+1) = s6
+                        // Sort top enemy 1.
+                        s7$ = topEnemyName(1,j)
+                        topEnemyName(1,j) = topEnemyName(1,j+1)
+                        topEnemyName(1,j+1) = s7$
+                        // Sort top enemy 2.
+                        s8$ = topEnemyName(2,j)
+                        topEnemyName(2,j) = topEnemyName(2,j+1)
+                        topEnemyName(2,j+1) = s8$
+                        // Sort top enemy 1 wins.
+                        s9 = topEnemyWins(1,j)
+                        topEnemyWins(1,j) = topEnemyWins(1,j+1)
+                        topEnemyWins(1,j+1) = s9
+                        // Sort top enemy 1 losses.
+                        s10 = topEnemyLosses(1,j)
+                        topEnemyLosses(1,j) = topEnemyLosses(1,j+1)
+                        topEnemyLosses(1,j+1) = s10
+                        // Sort top enemy 2 wins.
+                        s11 = topEnemyWins(2,j)
+                        topEnemyWins(2,j) = topEnemyWins(2,j+1)
+                        topEnemyWins(2,j+1) = s11
+                        // Sort top enemy 2 losses.
+                        s12 = topEnemyLosses(2,j)
+                        topEnemyLosses(2,j) = topEnemyLosses(2,j+1)
+                        topEnemyLosses(2,j+1) = s12
+                    EndIf
+                Next j
+            Next i
+        
+        EndIf
+    
+        // Increase total rounds played amount.
+        totalRoundsPlayed=totalRoundsPlayed+1
+        
+        // Increase total play time.
+        totalPlayTime=totalPlayTime+roundDuration
+
+        // Save statistics.
+        f=OpenToWrite("Data\Statistics.dat")
+        
+            WriteLine f,totalRoundsPlayed
+            WriteLine f,totalPlayTime
+            
+            For i=1 To topListAmount
+                WriteLine f,topName(i)
+                WriteLine f,topColor(i)
+                WriteLine f,topWins(i)
+                WriteLine f,topLosses(i)
+                WriteLine f,topAccuracy(i)
+                For j=1 To 2
+                    WriteLine f,topEnemyName(j,i)
+                    WriteLine f,topEnemyWins(j,i)
+                    WriteLine f,topEnemyLosses(j,i)
+                Next j
+            Next i
+            
+        CloseFile f
+        
+        currentRoundStatsSaved=True
+    
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================
+// SUB: Get input hit.
+// =====================================================================================================================================================================================================
+CheckInputHit_Stats:
+
+    If statsActive=True Then
+        
+        isInputHit=False
+        
+        If KeyHit(28) Or KeyHit(156) Then
+            isInputHit=True
+        ElseIf gamepadSupport=True Then
+            If mainGamepad>=0 And mainGamepad<=3 And XGamepadConnected(mainGamepad)=True Then
+                isInputHit = XInputXButton(mainGamepad)
+                
+                // Save gamepad input hit state and falsify repeated (hold) input.
+                If isInputHit=True Then
+                    If isInputHit=wasGamepadInputHit Then
+                        isInputHit=False
+                    EndIf
+                    wasGamepadInputHit=True
+                Else
+                    wasGamepadInputHit=False
+                EndIf
+            EndIf
+        EndIf
+        
+    EndIf
+
+Return
+
+// =====================================================================================================================================================================================================

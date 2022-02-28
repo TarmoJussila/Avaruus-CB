@@ -1,0 +1,120 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - CheckSettings
+// =====================================================================================================================================================================================================
+
+// Check if game setup file exists (and that it is not a folder).
+If FileExists("Data\Settings.dat")=True And IsDirectory("Data\Settings.dat")=False Then
+
+    // Read settings file.
+    f=OpenToRead("Data\Settings.dat")
+    
+        musicEnabled = ReadLine(f)      // 0 or 1.
+        soundEnabled = ReadLine(f)      // 0 or 1.
+        musicBarAmount = ReadLine(f)    // 1-5.
+        soundBarAmount = ReadLine(f)    // 1-5.
+        vsyncSetting = ReadLine(f)      // 0 or 1.
+        limitFrameRate = ReadLine(f)    // 0 or 1.
+        
+        For i=1 To 3
+            craftKeybind(i) = ReadLine(f) // 1-4.
+        Next i
+        
+        For i=1 To 3
+            craftGamepad(i) = ReadLine(f) // 1-4.
+        Next i
+        
+    CloseFile f
+    
+    // Check and correct values if necessary.
+    If musicEnabled<0 Then musicEnabled=False
+    If musicEnabled>1 Then musicEnabled=True
+    If soundEnabled<0 Then soundEnabled=False
+    If soundEnabled>1 Then soundEnabled=True
+    
+    If musicBarAmount<1 Then musicBarAmount=1
+    If musicBarAmount>5 Then musicBarAmount=5
+    If soundBarAmount<1 Then soundBarAmount=1
+    If soundBarAmount>5 Then soundBarAmount=5
+    
+    musicVolume = Min(musicBarAmount * 20, 100)
+    soundVolume = Min(soundBarAmount * 20, 100)
+    
+    If vsyncSetting<0 Then vsyncSetting=0 // CPU.
+    If vsyncSetting>1 Then vsyncSetting=1 // GPU.
+    If limitFrameRate<0 Then limitFrameRate=False
+    If limitFrameRate>1 Then limitFrameRate=True
+    
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    If limitFrameRate=True Then
+        If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+            If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
+            If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
+            If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+        Else
+            If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+        EndIf
+    Else
+        If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+            If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
+            If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
+            If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
+        Else
+            If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
+        EndIf
+    EndIf
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        
+    For i=1 To 3
+        If craftKeybind(i)<1 Or craftKeybind(i)>4 Then resetKeybinds=True // Reset if not 1-4.
+    Next i
+    
+    If resetKeybinds=False Then
+        If craftKeybind(1)=craftKeybind(2) Or craftKeybind(1)=craftKeybind(3) Or craftKeybind(2)=craftKeybind(3) Then resetKeybinds=True
+    EndIf
+    
+    For i=1 To 3
+        If craftGamepad(i)<1 Or craftGamepad(i)>4 Then resetGamepads=True // Reset if not 1-4.
+    Next i
+    
+    If resetGamepads=False Then
+        If craftGamepad(1)=craftGamepad(2) Or craftGamepad(1)=craftGamepad(3) Or craftGamepad(2)=craftGamepad(3) Then resetGamepads=True
+    EndIf
+    
+    If resetKeybinds=True Then
+        For i=1 To 3
+            craftKeybind(i)=i
+        Next i
+    EndIf
+    
+    If resetGamepads=True Then
+        For i=1 To 3
+            craftGamepad(i)=i
+        Next i
+    EndIf 
+
+Else // If settings file doesn't exist (or it is a folder) create one.
+
+    // Create settings file.
+    f=OpenToWrite("Data\Settings.dat")
+    
+        // Write default values in file.
+        WriteLine f,1   // musicEnabled.
+        WriteLine f,1   // soundEnabled.
+        WriteLine f,3   // musicBarAmount.
+        WriteLine f,5   // soundBarAmount.
+        WriteLine f,0   // vsyncSetting.
+        WriteLine f,0   // limitFrameRate.
+        
+        For i=1 To 3
+            WriteLine f,i // craftKeybind.
+        Next i
+        
+        For i=1 To 3
+            WriteLine f,i // craftGamepad.
+        Next i
+ 
+    CloseFile f
+    
+EndIf
+
+// =====================================================================================================================================================================================================

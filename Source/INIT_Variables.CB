@@ -1,0 +1,228 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - Variables
+// =====================================================================================================================================================================================================
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Screen variables.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Dim sw : sw=ScreenWidth()       // Screen width in pixels.
+Dim sh : sh=ScreenHeight()      // Screen height in pixels.
+Dim posX : posX = (sw-1024)/2   // Center-fix value X.
+Dim posY : posY = (sh-720)/2    // Center-fix value Y.
+
+Dim clampedPosY : clampedPosY = (Min(sh, 800)-720)/2 // Center-fix value Y (clamped at 800 height). For large custom resolutions.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Menu and setting variables.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Dim roundAmount : roundAmount = 3 // Round amount. Will be overriden by user settings.
+Dim playerAmount : playerAmount = 3 // Initially this should always be 3 (max player amount). Will be overridden by user settings.
+Dim playerArmor : playerArmor = 100 // Player armor. Will be overriden by user settings.
+
+Dim pActive(playerAmount) As Byte
+Dim pNameActive(playerAmount) As Byte
+Dim pNickName(playerAmount) As String
+Dim userInput(playerAmount) As String
+
+Dim gameActive : gameActive = False // Game not active by default.
+Dim menuActive : menuActive = True // Menu is active by default.
+Dim mainMenuActive : mainMenuActive = True
+Dim settingsMenuActive : settingsMenuActive = False
+Dim statsMenuActive : statsMenuActive = False
+Dim infoMenuActive : infoMenuActive = False
+Dim statsActive : statsActive = False
+Dim gamePaused : gamePaused = False
+
+Dim musicEnabled : musicEnabled=True
+Dim soundEnabled : soundEnabled=True
+Dim musicVolume : musicVolume = 60
+Dim soundVolume : soundVolume = 100
+Dim musicBarAmount : musicBarAmount=3
+Dim soundBarAmount : soundBarAmount=5
+
+Dim settingActive(3)
+
+Dim isPointerActive : isPointerActive=False
+Dim pointerSpeed : pointerSpeed=500
+Dim isPointerMoving : isPointerMoving=False
+Dim isInputHit : isInputHit=False
+Dim wasGamepadInputHit : wasGamepadInputHit=False
+
+Dim arenaBorders : arenaBorders=False // FALSE = Fly-through borders. TRUE = Cannot cross borders.
+Dim craftCollision : craftCollision=ON // OFF = No craft collision. ON = Crafts collide with each other.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Round and statistic variables.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Dim p1_wins, p2_wins, p3_wins
+Dim p1_losses, p2_losses, p3_losses
+Dim winner : winner = 0
+
+Dim currentRound : currentRound = 1 // At start current round is 1.
+Dim playersAlive : playersAlive = 0 // No players alive at launch.
+
+Dim roundDurationTimer
+Dim roundDuration
+Dim matchDuration
+
+Dim totalRoundsPlayed
+Dim totalPlayTime
+Dim totalShotsFired // TODO.
+Dim totalItemsUsed // TODO.
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Player variables.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Dim craft_1, craft_2, craft_3, craft_4, craft_5, craft_6
+
+Dim craftObj(playerAmount)
+Dim craftColor(playerAmount)
+Dim craftId(playerAmount)
+Dim craftFrame(playerAmount)
+
+Dim craftX#(playerAmount)
+Dim craftY#(playerAmount)
+Dim craftVelX#(playerAmount)
+Dim craftVelY#(playerAmount)
+Dim craftAngle#(playerAmount)
+Dim craftThrust#(playerAmount)
+Dim craftFriction#(playerAmount)
+Dim craftSpeed#(playerAmount)
+Dim craftTurnSpeed#(playerAmount)
+Dim craftArmor(playerAmount)
+Dim craftReload#(playerAmount)
+Dim craftWeapon(playerAmount)
+Dim craftAlive(playerAmount)
+Dim craftKeybind(playerAmount)
+Dim craftGamepad(playerAmount)
+Dim craftCollisionTimer(playerAmount)
+Dim craftDamageTime(playerAmount)
+
+Dim craftFrictionX#(playerAmount)
+Dim craftFrictionY#(playerAmount)
+
+Dim craftSettingColor(playerAmount)
+
+craftKeybind(1) = 1 : craftKeybind(2) = 2 : craftKeybind(3) = 3 // Default keybinds.
+craftGamepad(1) = 1 : craftGamepad(2) = 2 : craftGamepad(3) = 3 // Default gamepads.
+
+Dim mainGamepad : mainGamepad = 0 // Main gamepad: the first gamepad user index.
+
+Dim craftThrustKey(3), craftReverseKey(3), craftRightKey(3), craftLeftKey(3), craftShootKey(3), craftSecondaryShootKey(3)
+Dim craftGamepadThrustKey(3), craftGamepadReverseKey(3), craftGamepadRightKey(3), craftGamepadLeftKey(3), craftGamepadShootKey(3)
+
+Dim secondaryKeybindEnabled : secondaryKeybindEnabled=True // Secondary keybind is enabled by default.
+
+Dim craftTurboActive(playerAmount)
+Dim turboDuration(playerAmount)
+
+Dim craftShieldActive(playerAmount)
+Dim shieldDuration(playerAmount)
+
+Dim craftWhiskeyActive(playerAmount)
+Dim whiskeyDuration(playerAmount)
+
+Dim craftShotsFired(playerAmount,2) // 1 = Round total, 2 = Match total fired shots.
+Dim craftShotsHit(playerAmount,2)   // 1 = Round total, 2 = Match total hit shots.
+
+Dim reloadTime(playerAmount)
+Dim craftExplosionState(playerAmount)
+Dim showItemName(playerAmount)
+Dim switchItem(playerAmount)
+Dim itemSwitchFrame(playerAmount)
+Dim explosionInactive(playerAmount)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Item variables.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Dim totalItemAmount : totalItemAmount=18 // Needed for sorting round item usage amounts.
+Dim maxItemAmount : maxItemAmount = 10 // Base amount (will be 1-5 times this).
+Dim itemLifespan : itemLifespan = 20 // Item lifespan in seconds. Will vary a bit.
+
+Dim spawnMetalItems : spawnMetalItems=False // Spawn metal items (magnet item state).
+Dim disappearItems : disappearItems=False // Disappear items (sandglass item state).
+Dim explodeItems : explodeItems=False // Explode items (shocker item state).
+
+Dim fruitSetting : fruitSetting = True // FALSE = Fruits do nothing, TRUE = Fruits give armor.
+
+Dim collectedItems(3,18,2) // 1-3 (players), 0-17 (items), 0-2 (item data: 1 = Round, 2 = Match).
+
+// Set item ID:s to default.
+For p = 1 To playerAmount
+    For i = 0 To 17
+        collectedItems(p,i,0)=i
+    Next i
+Next p
+
+Dim ammoBiso(playerAmount)
+Dim ammoShot(playerAmount)
+Dim ammoMgun(playerAmount)
+Dim ammoBazo(playerAmount)
+Dim ammoMine(playerAmount)
+Dim ammoSprd(playerAmount)
+
+Dim shieldPart(16)
+Dim shieldAngle(16)
+Dim shieldX(16)
+Dim shieldY(16)
+
+Dim weaponActive(6)
+Dim toolActive(6)
+Dim otherActive(6)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Types: items, bullets and particles.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Type ITEM
+    Field obj
+    Field x#
+    Field y#
+    Field angle#
+    Field id
+    Field lifespan
+    Field lifespanTimer
+    Field flickerTimer
+    Field frame
+    Field frameChangeTimer
+    Field alive
+EndType
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Type BULLET
+    Field obj
+    Field x#
+    Field y#
+    Field angle#
+    Field speed#
+    Field size
+    Field lifespan
+    Field damage
+    Field category
+    Field frame
+    Field frameChangeTimer
+    Field owner
+EndType
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Type PARTICLE
+    Field obj
+    Field x#
+    Field y#
+    Field angle#
+    Field speed#
+    Field lifespan
+    Field frame
+    Field frameChangeTimer
+    Field frameChangeSpeed
+    Field frameDirection
+EndType
+
+// =====================================================================================================================================================================================================

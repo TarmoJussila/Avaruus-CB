@@ -1,0 +1,424 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateItems
+// =====================================================================================================================================================================================================
+UpdateItems:
+
+    roundItemAmountAverage = (weaponBarAmount+toolBarAmount+otherBarAmount)/3 // Average item amount depending on all bar settings.
+    roundMaxItemAmount = maxItemAmount*roundItemAmountAverage // Round max item amount depends on item amount setting.
+    
+    // Every five seconds it is possible for new item to be created if max amount is not reached.
+    If Timer()>itemFreqTimer+500 And itemAmount<roundMaxItemAmount And playersAlive>1 And gamePaused=False And gameActive=True Then
+
+        randItem = Rand(0,17) // Randomize which item.
+        
+        // Get chances for each item type depending on setting.
+        weaponChance = (weaponBarAmount * 100) / 5 // Always 20-100.
+        toolChance = (toolBarAmount * 100) / 5 // Always 20-100.
+        otherChance = (otherBarAmount * 100) / 5 // Always 20-100.
+        itemChance = 100 // Default item chance (will be overriden).
+        
+        itemCreation=True // Item creation enabled by default.
+        isItemAvailable=True // Is item available (enabled in menu).
+        
+        If randItem=>0 And randItem=<5 // Random weapon.
+            itemChance = weaponChance
+            For i=1 To 6
+                If randItem+1=i And weaponActive(i)=False Then itemCreation=False : isItemAvailable=False // Do not spawn if disabled.
+            Next i
+
+        ElseIf randItem=>6 And randItem=<11 // Random tool.
+            itemChance = toolChance
+            For i=1 To 6
+                If randItem-5=i And toolActive(i)=False Then itemCreation=False : isItemAvailable=False // Do not spawn if disabled.
+            Next i
+
+        ElseIf randItem=>12 And randItem=<17 // Random other.
+            itemChance = otherChance
+            For i=1 To 6
+                If randItem-11=i And otherActive(i)=False Then itemCreation=False : isItemAvailable=False // Do not spawn if disabled.
+            Next i
+        ElseIf randItem=>18 // Crate.
+            itemChance = (weaponChance + toolChance + otherChance) / 3
+        EndIf
+        
+        // Check spawning state based on rarity setting.
+        If itemCreation=True
+            randomVariance=Rand(0,100)
+            If randomVariance>itemChance Then itemCreation=False // Custom chance to spawn item.
+        EndIf
+        
+        // If creation still active randomize creation TRUE/FALSE for variance.
+        If itemCreation=True
+            randomVariance=Rand(0,100)
+            If randomVariance<50 Then itemCreation=False // 50% chance to spawn any item.
+        EndIf
+        
+        // Special check for RARE items that should not spawn so often.
+        If itemCreation=True
+            If randItem=4 Or randItem=12 Or randItem=10 Or randItem=11 Or randItem=13 Or randItem=5 Or randItem=9 Then // RARE: Spreader (4), Whiskey (12), Paint (10), Time (11), Shocker (13), Mine (5), Magnet (9).
+                randomVariance=Rand(0,100)
+                If randomVariance<50 Then itemCreation=False // 50% chance to spawn RARE item.
+            EndIf
+        EndIf
+        
+        // Never spawn Time, Shocker or Magnet if item amount requirements not met.
+        If itemCreation=True Then
+            If randItem=11 Then // Time (11).
+                If itemAmount<5 Or timeExists=True Then itemCreation=False // Never spawn if not at LEAST five items on screen.
+            ElseIf randItem=13 Then // Shocker (13).
+                If itemAmount<5 Or shockerExists=True Or breakableExists=False Then itemCreation=False // Never spawn if not at LEAST five items on screen.
+            ElseIf randItem=9 Then // Magnet (9).
+                If itemAmount>5 Or magnetExists=True Then itemCreation=False // Never spawn if MORE than five items on screen.
+            EndIf
+            
+            // ADDITIONAL FRUITS: Spawn fruits instead of items not meeting requirements.
+            If itemCreation=False Then 
+                randItem = Rand(14,17)
+                If otherActive(randItem-11)=True Then
+                    itemCreation=True
+                EndIf
+            EndIf
+        EndIf
+        
+        // Get random position.
+        itemPosX = Rand(30,sw-30)
+        itemPosY = Rand(30,sh-30)
+        
+        // Check position validity.
+        If itemCreation=True Then
+            
+            // Check if craft is too close.
+            For i=1 To playerAmount
+                If Distance(itemPosX, itemPosY, craftX(i), craftY(i))<=70 And craftArmor(i)>0 Then
+                    itemCreation=False
+                    Exit
+                EndIf
+            Next i
+            
+            // Check if existing item is too close.
+            If itemCreation=True Then
+                For iItem.ITEM = Each ITEM
+                    If Distance(itemPosX, itemPosY, iItem\x, iItem\y)<=40 Then
+                        itemCreation=False
+                        Exit
+                    EndIf
+                Next iItem
+            EndIf
+            
+            // Check if spawned mine is too close.
+            If itemCreation=True Then
+                For iBullet.BULLET = Each BULLET
+                    If iBullet\category=3 And Distance(itemPosX, itemPosY, iBullet\x, iBullet\y)<=40 Then // Bullet category = 3 (mine).
+                        itemCreation=False
+                        Exit
+                    EndIf
+                Next iBullet
+            EndIf
+        
+        EndIf
+        
+        // Spawn item (if creation still active).
+        If itemCreation=True Then
+        
+            itemAmount = itemAmount+1
+        
+            newItem.ITEM = New(ITEM)
+            
+            newItem\id = randItem
+            newItem\x = itemPosX
+            newItem\y = itemPosY
+            newItem\angle = 1
+            newItem\lifespan = itemLifespan + Rnd(-1.0,2.0)
+                
+            If newItem\id = 0
+                newItem\obj = CloneImage(item_bishooter)
+            ElseIf newItem\id = 1
+                newItem\obj = CloneImage(item_shotgun)
+            ElseIf newItem\id = 2
+                newItem\obj = CloneImage(item_machinegun)
+            ElseIf newItem\id = 3
+                newItem\obj = CloneImage(item_bazooka)
+            ElseIf newItem\id = 4
+                newItem\obj = CloneImage(item_spreader)      
+            ElseIf newItem\id = 5
+                newItem\obj = CloneImage(item_mine)
+            ElseIf newItem\id = 6
+                newItem\obj = CloneImage(item_repair)
+            ElseIf newItem\id = 7
+                newItem\obj = CloneImage(item_turbo)
+            ElseIf newItem\id = 8
+                newItem\obj = CloneImage(item_shield)
+            ElseIf newItem\id = 9
+                newItem\obj = CloneImage(item_magnet)
+            ElseIf newItem\id = 10
+                newItem\obj = CloneImage(item_paint)
+            ElseIf newItem\id = 11
+                newItem\obj = CloneImage(item_sandglass)
+            ElseIf newItem\id = 12
+                newItem\obj = CloneImage(item_whiskey)
+            ElseIf newItem\id = 13
+                newItem\obj = CloneImage(item_shocker)
+            ElseIf newItem\id = 14
+                newItem\obj = CloneImage(item_melon)
+            ElseIf newItem\id = 15
+                newItem\obj = CloneImage(item_banana)
+            ElseIf newItem\id = 16
+                newItem\obj = CloneImage(item_pineapple)
+            ElseIf newItem\id = 17
+                newItem\obj = CloneImage(item_eggplant)
+            ElseIf newItem\id = 18 // Special item: crate.
+                newItem\obj = CloneImage(item_crate)
+            EndIf
+
+        EndIf
+        
+        // Reset item freq timer (if item creation true or item is available).
+        If itemCreation=True Or isItemAvailable=True // Otherwise do not reset timer (will re-randomize item).
+            itemFreqTimer=Timer()
+        EndIf
+            
+    EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Spawn metal items (magnet item state).
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    If spawnMetalItems=True And playersAlive>1 Then
+        
+        spawnedMetalItems=0 // Zero spawned metal items by default. Will stop at three.
+        
+        For i=1 To 10 // Ten overlap checks at most but will force-exit after three successful spawns.            
+            
+            // Metal item creation enabled by default.
+            itemCreation=True
+            
+            // Get random position.
+            itemPosX = Rand(30,sw-30)
+            itemPosY = Rand(30,sh-30)
+            
+            // Check if craft is too close.
+            For i=1 To playerAmount
+                If Distance(itemPosX, itemPosY, craftX(i), craftY(i))<=70 And craftArmor(i)>0 Then
+                    itemCreation=False
+                    Exit
+                EndIf
+            Next i
+            
+            // Check if existing item is too close.
+            If itemCreation=True Then
+                For iItem.ITEM = Each ITEM
+                    If Distance(itemPosX, itemPosY, iItem\x, iItem\y)<=40 Then
+                        itemCreation=False
+                        Exit
+                    EndIf
+                Next iItem
+            EndIf
+            
+            // Check if spawned mine is too close.
+            If itemCreation=True Then
+                For iBullet.BULLET = Each BULLET
+                    If iBullet\category=3 And Distance(itemPosX, itemPosY, iBullet\x, iBullet\y)<=40 Then // Bullet category = 3 (mine).
+                        itemCreation=False
+                        Exit
+                    EndIf
+                Next iBullet
+            EndIf
+            
+            If itemCreation=True Then
+            
+                randomMetalItem = Rand(0,8) // Randomize which (metal) item (from bi-shooter to shield).
+        
+                itemAmount = itemAmount+1
+                spawnedMetalItems = spawnedMetalItems+1
+                
+                newItem.ITEM = New(ITEM)
+                
+                newItem\id = randomMetalItem
+                newItem\x = itemPosX
+                newItem\y = itemPosY
+                newItem\angle = 1
+                newItem\lifespan = itemLifespan + Rnd(-2,2)
+                    
+                If newItem\id = 0
+                    newItem\obj = CloneImage(item_bishooter)
+                ElseIf newItem\id = 1
+                    newItem\obj = CloneImage(item_shotgun)
+                ElseIf newItem\id = 2
+                    newItem\obj = CloneImage(item_machinegun)
+                ElseIf newItem\id = 3
+                    newItem\obj = CloneImage(item_bazooka)
+                ElseIf newItem\id = 4
+                    newItem\obj = CloneImage(item_spreader)      
+                ElseIf newItem\id = 5
+                    newItem\obj = CloneImage(item_mine)
+                ElseIf newItem\id = 6
+                    newItem\obj = CloneImage(item_repair)
+                ElseIf newItem\id = 7
+                    newItem\obj = CloneImage(item_turbo)
+                ElseIf newItem\id = 8
+                    newItem\obj = CloneImage(item_shield)
+                EndIf
+            
+            EndIf
+            
+            If spawnedMetalItems>=3 Then Exit // Break spawn loop after three successful spawns.
+        
+        Next i
+    
+    EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Reduce armor from every craft (shocker item state).
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    If explodeItems=True Then
+    
+        For i = 1 To playerAmount
+        
+            If craftArmor(i)>0 Then
+                craftArmor(i)=craftArmor(i)-1 // Reduce 1 armor from every craft.
+            EndIf
+        
+        Next i
+    
+    EndIf
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Reset exist state for certain items (do not exist by default).
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    magnetExists=False      // 9 = Magnet.
+    timeExists=False        // 11 = Time.
+    shockerExists=False     // 13 = Shocker.
+    breakableExists=False   // 12 = Whiskey. 14-17 = Fruits.
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    For iItem.ITEM = Each ITEM
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Force disappearance on all items (sandglass item state).
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If disappearItems=True Then
+            
+            iItem\lifespan=Min(iItem\lifespan,3) // Set lifespan of all items to very low (maximum lifespan of 3).
+        
+        EndIf
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Force explosion on all items (shocker item state).
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If explodeItems=True Then
+        
+            If iItem\id=12 Or (iItem\id=>14 And iItem\id=<17) And iItem\lifespan>0 Then // If object is fruit or whiskey.
+                For i = 1 To Rand(3,5)
+                    newPart.PARTICLE = New(PARTICLE)
+                    If iItem\id=12
+                        newPart\obj = CloneImage(part_pineapple) // NOTE: Whiskey bottle uses pineapple particles.
+                    ElseIf iItem\id=14
+                        newPart\obj = CloneImage(part_melon)
+                    ElseIf iItem\id=15
+                        newPart\obj = CloneImage(part_banana)
+                    ElseIf iItem\id=16
+                        newPart\obj = CloneImage(part_pineapple)
+                    ElseIf iItem\id=17
+                        newPart\obj = CloneImage(part_eggplant)
+                    EndIf
+                    newPart\angle = Rand(0,360)
+                    newPart\x = iItem\x
+                    newPart\y = iItem\y
+                    newPart\frame = Rand(0,23)
+                    newPart\speed = Rnd(0.2,2.0)
+                    newPart\frameDirection = Rand(0,1)
+                    newPart\frameChangeSpeed = Rand(20,100)
+                    newPart\lifespan = 2 // Lifespan is two screen passes.
+                Next i
+                
+                // Play random fruit sound (if sound limit not reached).
+                If (Not iItem\id=12) And fruitSoundAmount<fruitSoundLimit Then
+                    fruitSound=Rand(1,4) // Randomize which sound is played.
+                    If fruitSound=1
+                        PlaySound snd_fruit_1,soundVolume,0,Rand(40000,48000)
+                    ElseIf fruitSound=2
+                        PlaySound snd_fruit_2,soundVolume,0,Rand(40000,48000)
+                    ElseIf fruitSound=3
+                        PlaySound snd_fruit_3,soundVolume,0,Rand(40000,48000)
+                    ElseIf fruitSound=4
+                        PlaySound snd_fruit_4,soundVolume,0,Rand(40000,48000)    
+                    EndIf
+                    fruitSoundAmount+1
+                // Play glass break sound for whiskey bottle.    
+                ElseIf iItem\id=12
+                    PlaySound snd_hit_glass,soundVolume,0,Rand(40000,48000)
+                EndIf
+                
+                iItem\lifespan=0
+            EndIf
+            
+        EndIf
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Check if certain items already currently spawned.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If iItem\id = 9 Then magnetExists=True      // 9 = Magnet.
+        If iItem\id = 11 Then timeExists=True       // 11 = Time.
+        If iItem\id = 13 Then shockerExists=True    // 13 = Shocker.
+        
+        If iItem\id=12 Or (iItem\id=>14 And iItem\id=<17) Then breakableExists=True // 12 = Whiskey. 14-17 = Fruits.
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Update item lifespan, rotation and flicker state.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        // How fast does the item appear to rotate.
+        If Timer()>iItem\frameChangeTimer+50 And gamePaused=False
+            iItem\frame = iItem\frame + 1
+            iItem\frameChangeTimer = Timer()
+        EndIf
+        
+        // How much time it takes to lifespan to descent.
+        If Timer()>iItem\lifespanTimer+1000 And gamePaused=False
+            iItem\lifespan = iItem\lifespan - 1
+            iItem\lifespanTimer = Timer()
+        EndIf
+        
+        // If lifespan is low then make the item flicker.
+        If iItem\lifespan>0 And iItem\lifespan<5 And gamePaused=False
+             If Timer()>iItem\flickerTimer+(20*iItem\lifespan)
+                iItem\alive = Not iItem\alive
+                iItem\flickerTimer = Timer()
+            EndIf
+        Else
+            iItem\alive=1 // If lifespan not low, don't flicker.
+        EndIf
+        
+        // Limit sprite limit to 24 images, first image is 0.
+        If iItem\frame < 0 Then iItem\frame = 23
+        If iItem\frame > 23 Then iItem\frame = 0
+
+        //CenterText iItem\x,iItem\y-30,""+iItem\lifespan // Show lifespan to player.
+        If iItem\alive And iItem\lifespan>0 Then DrawObject(iItem\obj, iItem\x, iItem\y, iItem\frame)
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Delete parts with zero lifespan.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        If iItem\lifespan=<0 Then
+            itemAmount = itemAmount-1
+            DeleteImage iItem\obj
+            Delete iItem
+        EndIf
+
+    Next iItem
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    spawnMetalItems=False // Force spawn metal items disabled (magnet item state).
+    disappearItems=False // Force item disappearance disabled (sandglass item state).
+    explodeItems=False // Force item explosion disabled (shocker item state).
+    fruitSoundAmount=0 : fruitSoundLimit=3 // Reset fruit sound amount counter (limit play sound events).
+
+Return 
+// =====================================================================================================================================================================================================

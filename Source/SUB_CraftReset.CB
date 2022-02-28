@@ -1,0 +1,76 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - CraftReset
+// =====================================================================================================================================================================================================
+CraftReset:
+
+    // Set basic configurations.
+    craftColor(1) = P1_craftFrame : craftColor(2) = P2_craftFrame : craftColor(3) = P3_craftFrame
+    
+    // Randomize starting positions.
+    randPos = Rand(1,4)
+    If randPos=1 Then a=1 : b=2 : c=3 : d=0
+    If randPos=2 Then a=2 : b=3 : c=0 : d=1
+    If randPos=3 Then a=3 : b=0 : c=1 : d=2
+    If randPos=4 Then a=0 : b=1 : c=2 : d=3
+    
+    craftX(a) = Rand(100,sw/2-100) // Left.
+    craftY(a) = Rand(170,sh/2-170) // Top.
+    
+    craftX(b) = Rand(100+sw/2,sw-100) // Right.
+    craftY(b) = Rand(170,sh/2-170) // Top.
+    
+    craftX(c) = Rand(100,sw/2-100) // Left.
+    craftY(c) = Rand(170+sh/2,sh-170) // Bottom.
+    
+    craftX(d) = Rand(100+sw/2,sw-100) // Right.
+    craftY(d) = Rand(170+sh/2,sh-170) // Bottom.
+    
+    For i = 1 To playerAmount
+    
+        craftVelX(i) = 0 // Zero these before next round.
+        craftVelY(i) = 0 // to avoid 'ghost' movement.
+        
+        ammoBiso(i)=0 : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoSprd(i)=0 : ammoMine(i)=0
+        
+        craftId(i)=i
+        craftAngle(i)=Rand(0,360)
+        craftThrust(i)=0.1 // 0.1.
+        craftFriction(i)=0.985-Float((playerDrag-1)*0.005) // Craft friction/drag multiplied by player drag setting (1 = 0.975, 2 = 0.980, 3 = 0.985).
+        craftSpeed(i)=80+((playerSpeed-1)*40) // Craft speed multiplied by player speed setting (1 = 80, 2 = 120, 3 = 160).
+        craftTurnSpeed(i)=360
+        craftArmor(i)=playerArmor
+        craftReload(i)=40 // Reset craft reload time.
+        explosionInactive(i)=False
+        craftDamageTime(i)=0
+        craftAlive(i)=True // Make alive again.
+        
+        craftTurboActive(i)=False // Disable turbo, if still active in the end of round.
+        craftShieldActive(i)=False // Disable shield, if still active in the end of round.
+        
+        If craftWhiskeyActive(i)=True Then
+            // Return controls back to normal.
+            temp = craftRightKey(i)
+            craftRightKey(i) = craftLeftKey(i)
+            craftLeftKey(i) = temp
+            // Disable whiskey.
+            craftWhiskeyActive(i)=False
+        EndIf
+        
+        If craftColor(i) = 0
+            craftObj(i) = CloneImage(craft_1)
+        ElseIf craftColor(i) = 1
+            craftObj(i) = CloneImage(craft_2)
+        ElseIf craftColor(i) = 2
+            craftObj(i) = CloneImage(craft_3)
+        ElseIf craftColor(i) = 3
+            craftObj(i) = CloneImage(craft_4)
+        ElseIf craftColor(i) = 4
+            craftObj(i) = CloneImage(craft_5)
+        ElseIf craftColor(i) = 5
+            craftObj(i) = CloneImage(craft_6)
+        EndIf
+        
+    Next i
+
+Return     
+// =====================================================================================================================================================================================================

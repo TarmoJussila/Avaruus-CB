@@ -1,0 +1,64 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - SeekMusicFiles
+// =====================================================================================================================================================================================================
+
+If IsDirectory("Data\Music") // If Music-folder exists.
+
+    Const maxMusicFiles = 100
+    Const fileTypeAmount = 13
+    Const maxMusicFileNameLength=64
+
+    Dim fileType$(fileTypeAmount)
+    Dim fileName$(maxMusicFiles)
+    Dim shortFileName$(maxMusicFiles)
+    
+    ChDir "Data\Music" // Search in music folder.
+    StartSearch // Prepare search for music files.
+    
+    musicFileCount=0 // Music file count zero until proven otherwise.
+    
+    // Repeat the search loop until all files checked.
+    Repeat
+    
+        file$=FindFile()
+        
+        If file$="" Then Exit // If all files sought then exit loop.
+        
+        // Supported file types.
+        fileType(0)=".raw"  // .raw
+        fileType(1)=".mod"  // .mod
+        fileType(2)=".s3m"  // .s3m
+        fileType(3)=".xm"   // .xm
+        fileType(4)=".it"   // .it
+        fileType(5)=".mid"  // .mid
+        fileType(6)=".rmi"  // .rmi
+        fileType(7)=".wav"  // .wav
+        fileType(8)=".mp2"  // .mp2
+        fileType(9)=".mp3"  // .mp3
+        fileType(10)=".ogg" // .ogg
+        fileType(11)=".wma" // .wma
+        fileType(12)=".asf" // .asf
+        fileType(13)=".mo3" // .mo3
+        
+        // Loop for searching files with all acceptable file extensions.
+        For i=0 To fileTypeAmount
+            // Seek for files that end with.
+            If Lower(Right(file$,Len(fileType(i))))=fileType(i)
+                musicFileCount = musicFileCount+1
+                fileName(musicFileCount)=file$
+                shortFileName(musicFileCount)=Upper(Left(file$, Len(file$)-Len(fileType(i))))
+                If Len(shortFileName(musicFileCount))>maxMusicFileNameLength Then
+                    shortFileName(musicFileCount) = Left(shortFileName(musicFileCount), maxMusicFileNameLength) + "..."
+                EndIf
+            EndIf
+        Next i
+        
+    Until musicFileCount = maxMusicFiles
+    
+    EndSearch // End search.
+    
+    ChDir "..\.." // Back to default folder.
+    
+EndIf
+
+// =====================================================================================================================================================================================================

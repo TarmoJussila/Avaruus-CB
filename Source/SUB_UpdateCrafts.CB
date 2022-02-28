@@ -1,0 +1,276 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateCrafts
+// =====================================================================================================================================================================================================
+UpdateCrafts:
+
+    If gameActive=True Then
+
+        // Display startup timer.
+        haltMovement=False // Movement not halt by default.
+        // During startup counter, display player names and halt movement.
+        If Not Timer()>roundStart+3000 And gamePaused=False Then
+            haltMovement=True // During startup can't move craft.
+            // Show countdown from 3 to 1 at start.
+            If Timer()>startupNumber+2000 And gamePaused=False Then
+                DrawObject(digits_startup,sw/2,sh/2,0)
+            ElseIf Timer()>startupNumber+1000 And gamePaused=False Then
+                DrawObject(digits_startup,sw/2,sh/2,1)
+            ElseIf Timer()>startupNumber+1 And gamePaused=False Then
+                DrawObject(digits_startup,sw/2,sh/2,2)
+            EndIf
+        EndIf
+        
+        collisionSoundDelay=False // Reset collision sound delay state (can play again).
+        
+        // Crafts collide with each other.
+        If craftCollision=ON And playersAlive>1 And gamePaused=False Then
+            For i = 1 To playerAmount
+                If Timer()>craftCollisionTimer(i)+100 Then
+                    For j = 1 To playerAmount
+                        If (i=j)=False Then
+                            If craftArmor(i)>0 And craftArmor(j)>0 Then
+                                If Distance(craftX(i), craftY(i), craftX(j), craftY(j))<=40.0 Then
+                                    
+                                    // Get angle between colliding crafts.
+                                    angleBetweenPoints = GetAngle(craftX(i), craftY(i), craftX(j), craftY(j))
+                                    
+                                    // Reduce current velocity.
+                                    craftVelX(i) = craftVelX(i)/3.0 // Reduce current X velocity.
+                                    craftVelY(i) = craftVelY(i)/3.0 // Reduce current Y velocity.
+                                    
+                                    // Get collision force based on current velocity.
+                                    collisionVelocity# = (Abs(craftVelX(i)) + Abs(craftVelY(i))) * 1.0
+                                    collisionForce# = Max(collisionVelocity#, 0.1)
+                                    
+                                    // Push the collider.
+                                    craftVelX(i) = craftVelX(i) - collisionForce# * Cos(angleBetweenPoints)
+                                    craftVelY(i) = craftVelY(i) + collisionForce# * Sin(angleBetweenPoints)
+                                    
+                                    // Push the collidee.
+                                    craftVelX(j) = craftVelX(j) + collisionForce# * Cos(angleBetweenPoints)
+                                    craftVelY(j) = craftVelY(j) - collisionForce# * Sin(angleBetweenPoints)
+                                    
+                                    // Reset craft collision timer.
+                                    craftCollisionTimer(i)=Timer()
+    
+                                    // Play sound effect.
+                                    If collisionSoundDelay=False Then
+                                        collisionSound=Rand(1,2) // Randomize which sound is played.
+                                        If collisionSound=1
+                                            PlaySound snd_collision_1,soundVolume,0,Rand(40000,48000)
+                                        ElseIf collisionSound=2
+                                            PlaySound snd_collision_2,soundVolume,0,Rand(40000,48000)
+                                        EndIf
+                                        collisionSoundDelay=True
+                                    EndIf
+                                    
+                                EndIf
+                            EndIf
+                        EndIf
+                    Next j
+                EndIf
+            Next i
+        EndIf
+        
+        // Update crafts.
+        For i = 1 To playerAmount
+        
+            If craftArmor(i)>0 Then
+                
+                // If game is not paused, then make some motion.
+                If gamePaused=False Then
+                
+                    xForceApplied=0 : yForceApplied=0
+                    // Push crafts slightly away from borders if too close.
+                    If (craftVelX(i)>-0.15 And craftVelX(i)<0.15) Or (craftVelY(i)>-0.15 And craftVelY(i)<0.15) Then
+                        borderPushForce# = 0.0125 // Border push force.
+                        If craftX(i)<24 Then
+                            If craftAngle(i)=>90 And craftAngle(i)<270 Then
+                                craftVelX(i) = craftVelX(i) - borderPushForce# : xForceApplied=-1
+                            Else
+                                craftVelX(i) = craftVelX(i) + borderPushForce# : xForceApplied=1
+                            EndIf
+                        EndIf
+                        
+                        If craftX(i)>sw-24 Then
+                            If craftAngle(i)=>270 Or craftAngle(i)<90 Then
+                                craftVelX(i) = craftVelX(i) + borderPushForce# : xForceApplied=1
+                            Else
+                                craftVelX(i) = craftVelX(i) - borderPushForce# : xForceApplied=-1
+                            EndIf
+                        EndIf
+                        
+                        If craftY(i)<24 Then
+                            If craftAngle(i)=>0 And craftAngle(i)<180 Then
+                                craftVelY(i) = craftVelY(i) + borderPushForce# : yForceApplied=1
+                            Else
+                                craftVelY(i) = craftVelY(i) - borderPushForce# : yForceApplied=-1
+                            EndIf
+                        EndIf
+                        
+                        If craftY(i)>sh-24 Then
+                            If craftAngle(i)=>180 And craftAngle(i)<360 Then
+                                craftVelY(i) = craftVelY(i) - borderPushForce# : yForceApplied=-1
+                            Else
+                                craftVelY(i) = craftVelY(i) + borderPushForce# : yForceApplied=1
+                            EndIf
+                        EndIf
+                        
+                        // Apply extra force if craft in a corner zone.
+                        If (xForceApplied=0)=False And (yForceApplied=0)=False Then
+                            cornerPushForce# = 0.25 // Corner push force.
+                            craftVelX(i) = craftVelX(i) + (cornerPushForce# * xForceApplied)
+                            craftVelY(i) = craftVelY(i) + (cornerPushForce# * yForceApplied)
+                        EndIf
+                    EndIf
+                    
+                    gamepad = (craftGamepad(i)-1) // Get current craft gamepad id (0-3).
+                    
+                    If haltMovement=False Then // During startup counter, cannot move craft.
+
+                        gamepadMoveForce=False
+                        thrustInput#=0.0
+                        reverseInput#=0.0
+                        // GAMEPAD: Left/right triggers and up/down arrow buttons (thrust/reverse).
+                        If gamepadActive(i)=True Then
+                            If XInputUpButton(gamepad) Then
+                                craftGamepadThrustKey(i) = True
+                            Else 
+                                craftGamepadThrustKey(i) = False
+                            EndIf
+                            
+                            If XInputDownButton(gamepad) Then
+                                craftGamepadReverseKey(i) = True
+                            Else
+                                craftGamepadReverseKey(i) = False
+                            EndIf
+                            
+                            rightTrigger# = XInputRightTriggerButton(gamepad)/255.0
+                            leftTrigger# = XInputLeftTriggerButton(gamepad)/255.0
+                            
+                            If rightTrigger#>0.1 Then
+                                thrustInput# = rightTrigger#
+                                gamepadMoveForce=True
+                            EndIf
+                            
+                            If leftTrigger#>0.1 Then
+                                reverseInput# = leftTrigger#
+                                gamepadMoveForce=True
+                            EndIf
+                        EndIf
+                        
+                        // Get thrust/reverse input.
+                        If gamepadMoveForce=False Then
+                            thrustInput# = Max(KeyDown(craftThrustKey(i)), craftGamepadThrustKey(i))
+                            reverseInput# = Max(KeyDown(craftReverseKey(i)), craftGamepadReverseKey(i))
+                        EndIf
+                        
+                        // Apply friction to craft.
+                        craftFrictionX(i) = craftVelX(i) * craftFriction(i)
+                        craftFrictionY(i) = craftVelY(i) * craftFriction(i)
+                        
+                        // Apply all forces that affect craft.
+                        craftVelX(i) = craftFrictionX(i) + craftThrust(i) *  Cos(craftAngle(i)) * (Float(thrustInput#)-Float(reverseInput#*0.5))
+                        craftVelY(i) = craftFrictionY(i) - craftThrust(i) * -Sin(craftAngle(i)) * (Float(thrustInput#)-Float(reverseInput#*0.5))
+                        
+                        // Update craft position.
+                        craftX(i) = craftX(i) + PxPerSec(craftVelX(i)*craftSpeed(i))
+                        craftY(i) = craftY(i) + PxPerSec(craftVelY(i)*craftSpeed(i))
+                        
+                    EndIf
+                    
+                    // GAMEPAD: Right/left arrow buttons (left/right).
+                    If gamepadActive(i)=True Then
+                        If XInputRightButton(gamepad) Then
+                            craftGamepadRightKey(i) = True
+                        Else 
+                            craftGamepadRightKey(i) = False
+                        EndIf
+                        
+                        If XInputLeftButton(gamepad) Then
+                            craftGamepadLeftKey(i) = True
+                        Else
+                            craftGamepadLeftKey(i) = False
+                        EndIf
+                        
+                        // If whiskey active then switch left/right input for gamepad too.
+                        If craftWhiskeyActive(i)=True Then
+                            tempGamepadInput = craftGamepadRightKey(i)
+                            craftGamepadRightKey(i) = craftGamepadLeftKey(i)
+                            craftGamepadLeftKey(i) = tempGamepadInput
+                        EndIf
+                    EndIf
+                    
+                    // GAMEPAD: Left thumb (steering).
+                    gamepadTurnForce=False
+                    If gamepadActive(i)=True Then
+                        leftThumbX# = XInputLeftThumbXValue(gamepad) / 32767.0 // -1.0 to 1.0.
+                        
+                        // Turn craft.
+                        If leftThumbX#>0.25 Or leftThumbX#<-0.25 Then
+                            craftAngle(i) = craftAngle(i) + DgrPerSec(craftTurnSpeed(i) * leftThumbX#) // Amount of degree per second.
+                            gamepadTurnForce=True
+                        EndIf
+                    EndIf
+                    
+                    // Turn craft.
+                    If gamepadTurnForce=False Then
+                        If KeyDown(craftRightKey(i)) Or (gamepadActive(i)=True And craftGamepadRightKey(i)=True) Then // Steer left.
+                            craftAngle(i) = craftAngle(i) + DgrPerSec(craftTurnSpeed(i)) // Amount of degree per second.
+                        ElseIf KeyDown(craftLeftKey(i)) Or (gamepadActive(i)=True And craftGamepadLeftKey(i)=True) Then // Steer right.
+                            craftAngle(i) = craftAngle(i) - DgrPerSec(craftTurnSpeed(i)) // Amount of degree per second.
+                        EndIf
+                    EndIf
+                
+                EndIf
+
+                // Limit craft angle between 0 and 360.
+                craftAngle(i) = WrapAngle(craftAngle(i))
+                
+                // When to change between pictures (360 / 15 = 24 (0-23) images).
+                craftFrame(i) = Int(Float(craftAngle(i))/15.0)
+                
+                // Limit sprite limit to 24 images, first image is 0.
+                If craftFrame(i) < 0 Then craftFrame(i) = 23
+                If craftFrame(i) > 23 Then craftFrame(i) = 0
+                
+                // Crafts cannot go past screen borders.
+                If craftX(i) > sw+24 Then craftX(i) = -24
+                If craftX(i) < -24 Then craftX(i) = sw+24
+                If craftY(i) > sh+24 Then craftY(i) = -24
+                If craftY(i) < -24 Then craftY(i) = sh+24
+                
+                // Get rid of twitchy movement caused by really small numbers.
+                If craftVelX(i) => 0 And craftVelX(i) < 0.01 Then craftVelX(i) = 0 // When close enough to zero, round it down to zero.
+                If craftVelX(i) =< 0 And craftVelX(i) > -0.01 Then craftVelX(i) = 0
+                If craftVelY(i) => 0 And craftVelY(i) < 0.01 Then craftVelY(i)= 0
+                If craftVelY(i) =< 0 And craftVelY(i) > -0.01 Then craftVelY(i) = 0
+                
+                If craftArmor(i)>1000 Then craftArmor(i)=1000 // Max craft armor.
+                
+                // Draw all crafts.
+                If craftArmor(i)>0 Then
+                    If craftDamageTime(i)>0 Then
+                        DrawObject(craft_hit,craftX(i),craftY(i),craftFrame(i))
+                    Else
+                        DrawObject(craftObj(i),craftX(i),craftY(i),craftFrame(i))
+                    EndIf
+                EndIf
+                
+                // Reduce craft damage time each frame.
+                If craftDamageTime(i) > 0 Then craftDamageTime(i) = craftDamageTime(i) - PxPerSec(60)
+                If craftDamageTime(i) < 0 Then craftDamageTime(i) = 0
+                
+                // Item usage.
+                If craftArmor(i)>0 Then
+                    Gosub ItemUsage
+                EndIf
+                
+            EndIf
+    
+        Next i
+    
+    EndIf
+    
+Return 
+// =====================================================================================================================================================================================================

@@ -1,0 +1,59 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - ItemUsage
+// =====================================================================================================================================================================================================
+ItemUsage:
+    
+    // Shield active in craft.
+    If craftShieldActive(i)=True
+        If Timer()>shieldRotationSpeed+1
+            If gamePaused=False Then rotationSpeed+1
+            shieldRotationSpeed=Timer()
+        EndIf
+        For n = 1 To 16
+            If gamePaused=False
+                If n=<8
+                    shieldAngle(n) = n*45+rotationSpeed
+                Else
+                    shieldAngle(n) = n*45+rotationSpeed*-1
+                EndIf
+                shieldX(n) = craftX(i) + Cos(shieldAngle(n))*40
+                shieldY(n) = craftY(i) + Sin(shieldAngle(n))*40
+            EndIf
+            DrawObject(shieldPart(n),shieldX(n),shieldY(n))
+        Next n
+        // Shield duration 10 seconds.
+        If gamePaused=False
+            If Timer()>shieldDuration(i)+10000 // 10 seconds.
+                PlaySound snd_shield_reverse,soundVolume,0,Rand(40000,48000)
+                craftShieldActive(i)=False
+            EndIf
+        EndIf
+    EndIf
+    
+    // Turbo active in craft.
+    If craftTurboActive(i)=True And gamePaused=False
+        craftThrust(i)=0.15 // 1.5 x normal speed.
+        If Timer()>turboDuration(i)+5000 // 5 seconds.
+            PlaySound snd_turbo_reverse,soundVolume,0,Rand(40000,48000)
+            craftTurboActive(i)=False
+            craftThrust(i)=0.1
+        EndIf
+    EndIf
+    
+    // Whiskey active in craft.
+    If craftWhiskeyActive(i)=True And gamePaused=False
+        If Timer()>whiskeyDuration(i)+8000 // 8 seconds.
+            PlaySound snd_whiskey_reverse,soundVolume
+            // Return controls back to normal.
+            temp = craftRightKey(i)
+            craftRightKey(i) = craftLeftKey(i)
+            craftLeftKey(i) = temp
+            // Return steering settings back to normal.
+            craftThrust(i)=0.1
+            craftTurnSpeed(i)=360
+            craftWhiskeyActive(i)=False
+        EndIf
+    EndIf 
+     
+Return 
+// =====================================================================================================================================================================================================

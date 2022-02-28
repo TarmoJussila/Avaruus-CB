@@ -1,0 +1,187 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Sub Program - UpdateWeapons
+// =====================================================================================================================================================================================================
+UpdateWeapons:
+
+    If gameActive=True And gamePaused=False And haltMovement=False Then
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        For i = 1 To playerAmount // Go through every craft.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            
+            If craftArmor(i)>0 Then // If player is currently alive.
+                
+                // If there is ammo then use special weapons.
+                If ammoBiso(i)>0
+                    craftWeapon(i)=1
+                ElseIf ammoShot(i)>0
+                    craftWeapon(i)=2
+                ElseIf ammoMgun(i)>0
+                    craftWeapon(i)=3
+                ElseIf ammoBazo(i)>0
+                    craftWeapon(i)=4
+                ElseIf ammoSprd(i)>0
+                    craftWeapon(i)=5
+                ElseIf ammoMine(i)>0
+                    craftWeapon(i)=6
+                Else
+                    craftWeapon(i)=0 // If no ammo - use default weapon.
+                EndIf
+                
+                gamepad = (craftGamepad(i)-1) // Get current craft gamepad id (0-3).
+                
+                // Get gamepad shoot key input.
+                If gamepadActive(i)=True Then
+                    craftGamepadShootKey(i) = XInputXButton(gamepad)
+                EndIf
+                
+                // Shooting with / using a weapon.
+                If ((KeyDown(craftShootKey(i)) Or KeyDown(craftSecondaryShootKey(i))) Or (gamepadActive(i)=True And craftGamepadShootKey(i)=True)) And craftReload(i)=<0 Then
+                    
+                    If craftWeapon(i)=0 // Shooter.
+                        PlaySound snd_gun_shooter,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 1
+                        craftReload(i) = 40
+                        shootForce# = Rnd(0.1, 0.15)
+                    ElseIf craftWeapon(i)=1 // Bi-shooter.
+                        PlaySound snd_gun_bishooter,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 2
+                        craftReload(i) = 40
+                        ammoBiso(i) = ammoBiso(i)-1
+                        shootForce# = Rnd(0.15, 0.2)
+                    ElseIf craftWeapon(i)=2 // Shotgun.
+                        PlaySound snd_gun_shotgun,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 6
+                        craftReload(i) = 60
+                        ammoShot(i) = ammoShot(i)-1
+                        shootForce# = Rnd(0.5, 0.6)
+                    ElseIf craftWeapon(i)=3 // Machine gun.
+                        PlaySound snd_gun_machinegun,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 1
+                        craftReload(i) = 10
+                        ammoMgun(i) = ammoMgun(i)-1
+                        shootForce# = Rnd(0.2, 0.25)
+                    ElseIf craftWeapon(i)=4 // Bazooka.
+                        PlaySound snd_gun_bazooka,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 1
+                        craftReload(i) = 100
+                        ammoBazo(i) = ammoBazo(i)-1
+                        shootForce# = Rnd(1.0, 1.2)
+                    ElseIf craftWeapon(i)=5 // Spreader.
+                        PlaySound snd_gun_spreader,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 50
+                        craftReload(i) = 100
+                        ammoSprd(i) = ammoSprd(i)-1
+                        shootForce# = 0
+                    ElseIf craftWeapon(i)=6 // Mine.
+                        PlaySound snd_pickup_general,soundVolume,0,Rand(40000,48000)
+                        bulletAmount = 1
+                        craftReload(i) = 40
+                        ammoMine(i) = ammoMine(i)-1
+                        shootForce# = Rnd(-0.2, -0.15)
+                    EndIf
+                    
+                    // Count the amount of fired shots for the statistics.
+                    craftShotsFired(i,1)=craftShotsFired(i,1)+bulletAmount : craftShotsFired(i,2)=craftShotsFired(i,2)+bulletAmount
+                    
+                    // Set shoot force on craft.
+                    craftVelX(i) = craftVelX(i) - shootForce# *  Cos(craftAngle(i))
+                    craftVelY(i) = craftVelY(i) + shootForce# * -Sin(craftAngle(i))
+                   
+                    For j = 1 To bulletAmount
+                    
+                        newBullet.BULLET = New(BULLET) // New bullet.
+                        
+                        newBullet\speed = 9 + Rnd(0,0.5) // Default speed is constant 9 + random small number to make it more random.
+                        newBullet\size = 0 // Default size is zero (no additional collider size).
+                        newBullet\lifespan = 2 // Default: Lifespan is two screenpasses.
+                        newBullet\owner = i // Who shot the bullet.
+                        newBullet\frame = 0 // Default: No frames in normal bullet.
+                        barrelPos = 0 // Default: Shoots from the center.
+                        
+                        If craftWeapon(i)=0 // Shooter.
+    
+                            newBullet\obj = CloneImage(ammo_basic)
+                            newBullet\angle = craftAngle(i)+Rnd(-1.0,1.0)
+                            newBullet\damage = 5
+                            newBullet\category = 1 // Normal category bullet.
+                            barrelOffset = 30 // Distance the bullet leaves the craft.
+    
+                        ElseIf craftWeapon(i)=1 // Bi-shooter.
+    
+                            newBullet\obj = CloneImage(ammo_basic)
+                            newBullet\damage = 5
+                            newBullet\category = 1 // Normal category bullet.
+                            If j=1 Then barrelPos = 15 : newBullet\angle = craftAngle(i)+Rnd(-0.5,0) // Fixed barrel position because this gun shoots from two different barrels.
+                            If j=2 Then barrelPos = -15 : newBullet\angle = craftAngle(i)+Rnd(0,0.5) // Bullets can only differ away from each other rather than colliding.
+                            barrelOffset = 32  // Distance the bullet leaves the craft.
+    
+                        ElseIf craftWeapon(i)=2 // Shotgun.
+    
+                            newBullet\obj = CloneImage(ammo_basic)
+                            newBullet\angle = craftAngle(i)+Rnd(-3.0,3.0)
+                            newBullet\damage = 3
+                            newBullet\category = 1 // Normal category bullet.
+                            barrelOffset = 30 // Distance the bullet leaves the craft.
+    
+                        ElseIf craftWeapon(i)=3 // Machine gun.
+    
+                            newBullet\obj = CloneImage(ammo_basic)
+                            newBullet\angle = craftAngle(i)+Rnd(-1.0,1.0)
+                            newBullet\damage = 3
+                            newBullet\category = 1 // Normal category bullet.
+                            barrelOffset = 30 // Distance the bullet leaves the craft.
+    
+                        ElseIf craftWeapon(i)=4 // Bazooka.
+    
+                            newBullet\obj = CloneImage(ammo_bazooka)
+                            newBullet\angle = craftAngle(i)+Rnd(-1.0,1.0)
+                            newBullet\frame = newBullet\angle/15 // Bazooka bullet has sprite.
+                            newBullet\damage = 40
+                            newBullet\category = 2 // Bazooka category bullet.
+                            barrelOffset = 32 // Distance the bullet leaves the craft.
+                            newBullet\size = 4 // Additional size.
+                            
+                        ElseIf craftWeapon(i)=5 // Spreader.
+    
+                            newBullet\obj = CloneImage(ammo_basic)
+                            newBullet\angle = craftAngle(i)+Rnd(-180,180)
+                            newBullet\damage = 10
+                            newBullet\category = 1 // Normal category bullet.
+                            barrelOffset = 32 // Distance the bullet leaves the craft.
+                            
+                        ElseIf craftWeapon(i)=6 // Mine.
+    
+                            newBullet\obj = CloneImage(item_mine_armed)
+                            newBullet\angle = craftAngle(i)
+                            newBullet\damage = 40
+                            newBullet\category = 3 // Mine category bullet.
+                            barrelOffset = -50 // Distance the bullet leaves the craft.
+                            newBullet\size = 8 // Additional size.
+                            newBullet\speed = 0 // Mine has no speed.
+                            
+                        EndIf
+                        
+                        newBullet\x = craftX(i)
+                        newBullet\y = craftY(i)
+                        newBullet\x = newBullet\x + Cos(newBullet\angle - barrelPos) * barrelOffset // Further away from the craft.
+                        newBullet\y = newBullet\y + Sin(newBullet\angle - barrelPos) * barrelOffset // Further away from the craft.
+                        
+                    Next j
+                    
+                EndIf
+    
+                If craftReload(i) > 0 Then craftReload(i) = craftReload(i)-PxPerSec(60)
+                If craftReload(i) < 0 Then craftReload(i) = 0
+            
+            EndIf
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Next i // Next craft.
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+    EndIf
+    
+Return
+
+// =====================================================================================================================================================================================================

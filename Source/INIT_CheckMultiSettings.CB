@@ -1,0 +1,209 @@
+// =====================================================================================================================================================================================================
+// AVARUUS - Initial - CheckMultiSettings
+// =====================================================================================================================================================================================================
+
+// Random craft colors.
+P1_craftFrame = Rand(4,5) : craftColor(1)=P1_craftFrame
+P2_craftFrame = Rand(2,3) : craftColor(2)=P2_craftFrame
+P3_craftFrame = Rand(0,1) : craftColor(3)=P3_craftFrame
+
+Dim randNameAmount : randNameAmount = 64
+Dim pName(randNameAmount) As String
+Dim pNameCharLimit : pNameCharLimit = 8
+
+pName(0) = "ACE"
+pName(1) = "AJAX"
+pName(2) = "ALTAIR"
+pName(3) = "ANGEL"
+pName(4) = "ATLAS"
+pName(5) = "AVA"
+pName(6) = "AVIATOR"
+pName(7) = "BARON"
+pName(8) = "BAT"
+pName(9) = "BUG"
+
+pName(10) = "BIRD"
+pName(11) = "CASTOR"
+pName(12) = "CRANE"
+pName(13) = "CROW"
+pName(14) = "DRAKE"
+pName(15) = "EAGLE"
+pName(16) = "ELEKTRA"
+pName(17) = "FALCON"
+pName(18) = "FOO"
+pName(19) = "FOWL"
+
+pName(20) = "GEMINI"
+pName(21) = "GIZMO"
+pName(22) = "HARRIER"
+pName(23) = "HAWK"
+pName(24) = "HYPER"
+pName(25) = "ILMARI"
+pName(26) = "IRIS"
+pName(27) = "JET"
+pName(28) = "JUPITER"
+pName(29) = "KALEVA"
+
+pName(30) = "KITE"
+pName(31) = "KIWI"
+pName(32) = "KOKKO"
+pName(33) = "LARK"
+pName(34) = "LEIA"
+pName(35) = "LUNA"
+pName(36) = "MAGPIE"
+pName(37) = "MAVIS"
+pName(38) = "NEPTUNE"
+pName(39) = "NOVA"
+
+pName(40) = "OREL"
+pName(41) = "ORION"
+pName(42) = "OSPREY"
+pName(43) = "OWL"
+pName(44) = "PHOENIX"
+pName(45) = "PILOT"
+pName(46) = "POLLUX"
+pName(47) = "RAPTOR"
+pName(48) = "RAVEN"
+pName(49) = "RIGEL"
+
+pName(50) = "SATURN"
+pName(51) = "STAR"
+pName(52) = "TAURUS"
+pName(53) = "TEAL"
+pName(54) = "TITAN"
+pName(55) = "UKKO"
+pName(56) = "ULTRA"
+pName(57) = "VEGA"
+pName(58) = "VENUS"
+pName(59) = "VULTURE"
+
+pName(60) = "WEAVER"
+pName(61) = "WOLF"
+pName(62) = "XAVIER"
+pName(63) = "YARA"
+pName(64) = "ZODIAC"
+
+// Random name for each player (if name not set).
+Dim randName(3) As String
+randName(1) = pName(Rand(0, 21))    // 0-21.
+randName(2) = pName(Rand(22, 43))   // 22-43.
+randName(3) = pName(Rand(44, 64))   // 44-64.
+
+// Check if game setup file exists (and that it is not a folder).
+If FileExists("Data\Multiplayer.dat")=True And IsDirectory("Data\Multiplayer.dat")=False
+
+    // Read settings file.
+    f=OpenToRead("Data\Multiplayer.dat")
+    
+        // Read predetermined lines in file.
+        For i=1 To 3
+            pNickName(i) = ReadLine(f)
+            craftColor(i) = ReadLine(f)
+        Next i
+        For i=1 To 6
+            weaponActive(i) = ReadLine(f)
+        Next i
+        For i=1 To 6
+            toolActive(i) = ReadLine(f)
+        Next i
+        For i=1 To 6
+            otherActive(i) = ReadLine(f)
+        Next i
+        roundAmount = ReadLine(f)
+        playerAmount = ReadLine(f)
+        playerArmor = ReadLine(f)
+        playerSpeed = ReadLine(f)
+        playerDrag = ReadLine(f)
+        weaponAmmo = ReadLine(f)
+        weaponBarAmount = ReadLine(f)
+        toolBarAmount = ReadLine(f)
+        otherBarAmount = ReadLine(f)
+        
+    CloseFile f
+    
+    // Check and correct values if necessary.
+    For i=1 To 3
+        pNickName(i) = Upper(Trim(pNickName(i)))
+        If Len(pNickName(i)) > pNameCharLimit Or Len(pNickName(i)) = 0 Then pNickName(i) = randName(i)
+        
+        If craftColor(i)<0 Or craftColor(i)>5 Then
+            If i=1 Then craftColor(i)=P1_craftFrame
+            If i=2 Then craftColor(i)=P2_craftFrame
+            If i=3 Then craftColor(i)=P3_craftFrame
+        Else
+            P1_craftFrame = craftColor(1)
+            P2_craftFrame = craftColor(2)
+            P3_craftFrame = craftColor(3)
+        EndIf
+    Next i
+    For i=1 To 6
+        If weaponActive(i)<>0 And weaponActive(i)<>1 Then weaponActive(i) = True
+    Next i
+    For i=1 To 6
+        If toolActive(i)<>0 And toolActive(i)<>1 Then toolActive(i) = True
+    Next i
+    For i=1 To 6
+        If otherActive(i)<>0 And otherActive(i)<>1 Then otherActive(i) = True
+    Next i
+    If roundAmount<1 Or roundAmount>9 Then roundAmount=3
+    If playerAmount<2 Or playerAmount>3 Then playerAmount=2
+    If playerAmount=3 Then pActive(3)=True
+    If playerArmor<25 Or playerArmor>200 Then playerArmor=100
+    If playerSpeed<1 Or playerSpeed>3 Then playerSpeed=2
+    If playerDrag<1 Or playerDrag>3 Then playerDrag=2
+    If weaponAmmo<1 Or weaponAmmo>3 Then weaponAmmo=2
+    If weaponBarAmount<1 Or weaponBarAmount>5 Then weaponBarAmount=3
+    If toolBarAmount<1 Or toolBarAmount>5 Then toolBarAmount=3
+    If otherBarAmount<1 Or otherBarAmount>5 Then otherBarAmount=3
+
+Else // If settings file doesn't exist (or it is a folder) create one.
+
+    // Create settings file.
+    f=OpenToWrite("Data\Multiplayer.dat")
+    
+        // Write default values in file.
+        For i=1 To 3
+            WriteLine f,randName(i)
+            WriteLine f,craftColor(i)
+        Next i
+        For i=1 To 18
+            WriteLine f,1
+        Next i
+        WriteLine f,3   // roundAmount.
+        WriteLine f,2   // playerAmount.
+        WriteLine f,100 // playerArmor.
+        WriteLine f,2   // playerSpeed.
+        WriteLine f,2   // playerDrag.
+        WriteLine f,2   // weaponAmmo.
+        WriteLine f,3   // weaponBarAmount.
+        WriteLine f,3   // toolBarAmount.
+        WriteLine f,3   // otherBarAmount.
+ 
+    CloseFile f
+    
+    // Assign default values.
+    For i=1 To 3
+        pNickName(i) = randName(i)
+    Next i
+    For i=1 To 6
+        weaponActive(i) = True
+    Next i
+    For i=1 To 6
+        toolActive(i) = True
+    Next i
+    For i=1 To 6
+        otherActive(i) = True
+    Next i
+    roundAmount = 3
+    playerAmount = 2
+    playerArmor = 100
+    playerSpeed = 2
+    playerDrag = 2
+    weaponAmmo = 2
+    weaponBarAmount = 3
+    toolBarAmount = 3
+    otherBarAmount = 3
+    
+EndIf
+
+// =====================================================================================================================================================================================================

@@ -1,0 +1,50 @@
+//===============================================================================================================================================================================================================
+// AVARUUS - Initial - KeyboardShortcuts
+//===============================================================================================================================================================================================================
+KeyboardShortcuts:
+
+    // Toggle between fullscreen (window) and normal sizable window if sizable window mode active.
+    If screenSetting=2 // 2 = Sizable window mode.
+        If (KeyHit(87)) // F11.
+            If (windowSetting<3)
+                windowSetting=3 : SetWindow gameName, windowSetting // Toggle fullscreen window.
+            Else
+                windowSetting=1 : SetWindow gameName, windowSetting // Toggle normal window.
+            EndIf
+        EndIf    
+    EndIf
+
+    // Disable secondary shoot key binding for arrow keys binding if primary shoot key (or windows buttons) button hit detected.
+    If devMode>1 And secondaryKeybindEnabled=True And (KeyHit(157) Or KeyHit(219) Or KeyHit(220)) Then secondaryKeybindEnabled=False
+    
+    // Set frame limit ON (60FPS) or OFF (72FPS).
+    If devMode>0 Then
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        If KeyHit(59) And limitFrameRate=False And keyDelay=0 Then // F1.
+            If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+                If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
+                If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
+                If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+            Else
+                If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+            EndIf
+            limitFrameRate=True
+        ElseIf KeyHit(59) And limitFrameRate=True And keyDelay=0 Then // F1.
+            If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
+                If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
+                If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
+                If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
+            Else
+                If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
+            EndIf
+            limitFrameRate=False
+        EndIf
+        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    EndIf
+    
+    // Shut down application with: ALT + F4
+    If (KeyDown(56) Or KeyDown(184)) And KeyHit(62) Then End
+
+Return
+
+//===============================================================================================================================================================================================================
