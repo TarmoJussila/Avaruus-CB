@@ -9,7 +9,7 @@ Dim gameName As String : gameName       = "AVARUUS"     // Application name.
 Dim showLauncher : showLauncher         = True          // Show launcher at start.
 Dim windowFullscreen : windowFullscreen = False         // Fullscreen setting: TRUE = Window fullscreen, FALSE = Exclusive fullscreen.
 Dim vsyncSetting : vsyncSetting         = 0             // Vsync setting: 0 = CPU, 1 = GPU.
-Dim colorDepth : colorDepth             = 0             // Color depth = 0 (Automatic), 16, 24 or 32.
+Dim colorDepth : colorDepth             = 32            // Color depth = 0 (Automatic), 16, 24 or 32.
 Dim limitFrameRate : limitFrameRate     = False         // Limit frame rate: TRUE = Limit to 60FPS, FALSE = Limit to 72FPS.
 Dim doubleFrameRate : doubleFrameRate   = False         // Double frame rate: Limit to 120FPS or 144FPS depending on limit frame rate setting.
 Dim forceFrameRate : forceFrameRate     = False         // Force frame rate setting. TRUE = Force 30/40/50 frame rate. FALSE = No override.

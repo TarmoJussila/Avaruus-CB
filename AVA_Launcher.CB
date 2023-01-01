@@ -285,7 +285,7 @@ GetInitialScreenSettings:
     // Check and set screen color depth.
     colorDepth = ScreenDepth() // Get desktop color depth.
     
-    If colorDepth < 16 Then colorDepth = 0 // If color depth somehow below 16, set it to 0 (automatic).
+    If colorDepth < 16 Then colorDepth = 32 // If color depth somehow below 16, force it to 32.
     If colorDepth > 32 Then colorDepth = 32 // If color depth over 32, limit it to 32.
 
 Return
@@ -294,19 +294,6 @@ Return
 // SUB: Get current aspect ratio setting and set game screen size setting accordingly.
 // =====================================================================================================================================================================================================
 GetScreenSettings:
-    
-    // -------------------------------------------------------
-    // Supported resolutions:
-    // -------------------------------------------------------
-    // 21:9     = 1680x720 / 1792x768 / 1867x800 (2.333) [0] >>> TODO: 1866x800 (2.333)
-    // 2:1      = 1600x800 / 1536x768 / 1440x720 (2.000) [1]
-    // 16:9     = 1366x768 / 1360x768 / 1280x720 (1.777) [2] >>> TODO: 1365x768 (1.777)
-    // 15:9     = 1280x768 / 1200x720 / 1333x800 (1.666) [3]
-    // 16:10    = 1280x800 / 1152x720 / 1228x768 (1.600) [4] >>> TODO: 1229x768 (1.600)
-    // 3:2      = 1152x768 / 1080x720 / 1200x800 (1.500) [5]
-    // 4:3      = 1024x768 /  960x720 / 1067x800 (1.333) [6] >>> TODO: 1066x800 (1.333)
-    // 5:4      = 1024x800 /  960x768 / 1000x800 (1.250) [7] >>> TODO: 960x800  (1.200)
-    // -------------------------------------------------------
     
     If aspectSetting=<0 Then        // 21:9.
         gameSW=1680 : gameSH=720
