@@ -22,7 +22,7 @@ Dim showTrackName : showTrackName       = True          // Show track name on ch
 Dim devMode : devMode                   = 0             // Developer mode: 0 = Off, 1 = Developer mode, 2 = Debug mode.
 Dim majorVersion : majorVersion         = 1             // Major version digit.
 Dim minorVersion : minorVersion         = 3             // Minor version digit.
-Dim buildVersion : buildVersion         = 210602        // Build version 'YYMMDD'.
+Dim buildVersion : buildVersion         = 221231        // Build version 'YYMMDD'.
 Dim shortVersion As String : shortVersion = (majorVersion + "." + minorVersion)
 Dim completeVersion As String : completeVersion = (majorVersion + "." + minorVersion + "-" + buildVersion)
 
