@@ -139,10 +139,10 @@ Function DrawText(tX, tY, txt$, font, textAlign, z=255)
             posFix = posFix + 1
         Next i
     EndIf
-
-    tw=TextWidth(txt$)
+    
     SetFont font
-
+    tw=TextWidth(txt$)
+    
     If textAlign=0 Then // Align to left.
     
         If outline=True Then
@@ -175,7 +175,7 @@ Function DrawText(tX, tY, txt$, font, textAlign, z=255)
 EndFunction
 
 // =====================================================================================================================================================================================================
-// Get width of text made with DrawText
+// Get width of text made with DrawText.
 // =====================================================================================================================================================================================================
 Function GetDrawTextWidth(txt$)
 
@@ -195,7 +195,7 @@ Function GetDrawTextWidth(txt$)
 EndFunction
 
 // =====================================================================================================================================================================================================
-// Constant game speed.
+// Update screen with current vsync setting.
 // =====================================================================================================================================================================================================
 Function UpdateScreen(vsyncSetting)
 
