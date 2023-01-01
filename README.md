@@ -48,9 +48,9 @@ of AVARUUS began.
 PERFORMANCE
 ----------------------------------------------------------------
 
-The game folder contains DDraw.dll for DirectX 7.0 (DirectDraw)
-support. This file is needed in order to enhance the game
-performance on operating systems released after Windows XP.
+The game was originally created for DirectX 7.0 (DirectDraw).
+Consider running the game in compatibility mode or using a
+third-party wrapper to enhance the game performance if needed.
 
 - Recommended OS: Windows XP (or newer)
 - Minimum OS: Windows 98
