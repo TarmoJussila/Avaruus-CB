@@ -4,8 +4,8 @@ AVARUUS - LICENSE
 Copyright (c) 2006-2018 Tarmo Jussila
 
 This work is licensed under a [Creative Commons
-Attribution-NonCommercial-ShareAlike 4.0 International
-License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+Attribution-NonCommercial-ShareAlike 3.0 Unported
+License](http://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 The copyright for the music belongs to Juhani Haverinen.
 
