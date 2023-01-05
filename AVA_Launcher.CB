@@ -266,7 +266,7 @@ GetInitialScreenSettings:
         aspectSetting=i
         Gosub GetScreenSettings
     Next i
-
+    
     // Check if default aspect setting is supported.
     If screenSettingSupported(defaultAspectSetting)=True Then
         aspectSetting = defaultAspectSetting // Restore and use default aspect setting if supported.
@@ -278,6 +278,19 @@ GetInitialScreenSettings:
                 Exit
             EndIf
         Next i
+    EndIf
+    
+    // Check if any available screen mode is supported.
+    isAnyScreenSettingSupported=False
+    For i=0 To 7
+        If screenSettingSupported(i)=True Then
+            isAnyScreenSettingSupported=True
+            Exit
+        EndIf
+    Next i
+    If isAnyScreenSettingSupported=False Then
+        screenSettingSupported(6)=True // Support 4:3 screen setting as a fallback.
+        screenSetting=1 // Set windowed mode as default option in fallback scenario.
     EndIf
     
     isInitialScreenCheck=False // Initial screen setting check is disabled.
