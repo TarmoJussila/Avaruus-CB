@@ -84,7 +84,7 @@ Repeat
         DrawImage menu_selection,314,224
     
     // Launch game button.
-    ElseIf BoxOverlap(59,35,282,103,mx,my,1,1) Or BoxOverlap(85,39,231,78,mx,my,1,1)
+    ElseIf BoxOverlap(59,60,282,54,mx,my,1,1) Or BoxOverlap(117,35,166,103,mx,my,1,1)
     
         DrawObject(launcher_launch,200,276)
         DrawImage launcher_arrow_left,58,59
