@@ -33,17 +33,17 @@ controller emulator for non-supported gamepads.
 DEVELOPMENT
 ----------------------------------------------------------------
 
-The very first prototype version of the game was released in
-2006. Other major development sprints occurred in 2008 and in
-2011 but the game was never finalized until 2018.
+The very first prototype version of the game ("H.I.P.P.4.") was
+released in 2006. Other major development sprints occurred in
+2008 and in 2011 but the game was never finalized until 2018.
 
 After nearly a decade of inactivity in the development the game
 was almost lost forever - but luckily it was recovered and could
 be released with some newly added features and fixes.
 
-The game was developed with experimental CoolBasic game engine
-which was already outdated technology-wise when the development
-of AVARUUS began.
+The game was created with a legacy game engine called CoolBasic.
+The engine was already outdated technology-wise when the
+development of the game began.
 
 PERFORMANCE
 ----------------------------------------------------------------
