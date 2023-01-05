@@ -137,7 +137,11 @@ Repeat
     
     // Check screen settings support.
     If GetScreenModeSupport(selectedResolutionWidth,selectedResolutionHeight)=False Then
-        settingsSupported=False
+        If isAnyScreenSettingSupported=False Then
+            settingsSupported=True // Force settings as supported in case of fallback settings.
+        Else
+            settingsSupported=False // Settings not supported if screen mode not available.
+        EndIf
     Else
         settingsSupported=True // Settings are supported by default.
     EndIf
