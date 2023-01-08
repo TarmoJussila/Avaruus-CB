@@ -13,6 +13,17 @@ Dim posY : posY = (sh-720)/2    // Center-fix value Y.
 
 Dim clampedPosY : clampedPosY = (Min(sh, 800)-720)/2 // Center-fix value Y (clamped at 800 height). For large custom resolutions.
 
+Dim frameRateOptions(5)
+frameRateOptions(0) = OFF
+frameRateOptions(1) = 60
+frameRateOptions(2) = 72
+frameRateOptions(3) = 100
+frameRateOptions(4) = 120
+frameRateOptions(5) = 144
+Dim limitFrameRateIndexMax : limitFrameRateIndexMax = 5
+Dim limitFrameRateIndex : limitFrameRateIndex = 0
+If limitFrameRate=True Then limitFrameRateIndex = 1
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Menu and setting variables.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,7 +53,7 @@ Dim soundVolume : soundVolume = 100
 Dim musicBarAmount : musicBarAmount=3
 Dim soundBarAmount : soundBarAmount=5
 
-Dim settingActive(3)
+Dim settingActive(2) // Music and sound setting active state.
 
 Dim isPointerActive : isPointerActive=False
 Dim pointerSpeed : pointerSpeed=500

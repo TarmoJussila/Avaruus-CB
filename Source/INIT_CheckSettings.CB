@@ -8,19 +8,19 @@ If FileExists("Data\Settings.dat")=True And IsDirectory("Data\Settings.dat")=Fal
     // Read settings file.
     f=OpenToRead("Data\Settings.dat")
     
-        musicEnabled = ReadLine(f)      // 0 or 1.
-        soundEnabled = ReadLine(f)      // 0 or 1.
-        musicBarAmount = ReadLine(f)    // 1-5.
-        soundBarAmount = ReadLine(f)    // 1-5.
-        vsyncSetting = ReadLine(f)      // 0 or 1.
-        limitFrameRate = ReadLine(f)    // 0 or 1.
+        musicEnabled = ReadLine(f)          // 0 or 1.
+        soundEnabled = ReadLine(f)          // 0 or 1.
+        musicBarAmount = ReadLine(f)        // 1-5.
+        soundBarAmount = ReadLine(f)        // 1-5.
+        vsyncSetting = ReadLine(f)          // 0 or 1.
+        limitFrameRateIndex = ReadLine(f)   // 0-5.
         
         For i=1 To 3
-            craftKeybind(i) = ReadLine(f) // 1-4.
+            craftKeybind(i) = ReadLine(f)   // 1-4.
         Next i
         
         For i=1 To 3
-            craftGamepad(i) = ReadLine(f) // 1-4.
+            craftGamepad(i) = ReadLine(f)   // 1-4.
         Next i
         
     CloseFile f
@@ -41,26 +41,27 @@ If FileExists("Data\Settings.dat")=True And IsDirectory("Data\Settings.dat")=Fal
     
     If vsyncSetting<0 Then vsyncSetting=0 // CPU.
     If vsyncSetting>1 Then vsyncSetting=1 // GPU.
-    If limitFrameRate<0 Then limitFrameRate=False
-    If limitFrameRate>1 Then limitFrameRate=True
+
+    If limitFrameRateIndex>limitFrameRateIndexMax Then limitFrameRateIndex=limitFrameRateIndexMax
+    If limitFrameRateIndex<0 Then limitFrameRateIndex=0
     
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Apply limit frame rate settings.
+    frameRateValue = frameRateOptions(limitFrameRateIndex)
+    If frameRateValue<0 Or frameRateValue=OFF Then
+        limitFrameRate=False
+    Else
+        limitFrameRate=True
+    EndIf
+    
     If limitFrameRate=True Then
-        If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-            If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
-            If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
-            If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+        If frameRateValue<0 Or frameRateValue=OFF Then
+            FrameLimit OFF
         Else
-            If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+            FrameLimit frameRateValue
         EndIf
     Else
-        If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-            If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
-            If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
-            If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
-        Else
-            If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
-        EndIf
+        FrameLimit OFF
     EndIf
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
@@ -98,19 +99,19 @@ Else // If settings file doesn't exist (or it is a folder) create one.
     f=OpenToWrite("Data\Settings.dat")
     
         // Write default values in file.
-        WriteLine f,1   // musicEnabled.
-        WriteLine f,1   // soundEnabled.
-        WriteLine f,3   // musicBarAmount.
-        WriteLine f,5   // soundBarAmount.
-        WriteLine f,0   // vsyncSetting.
-        WriteLine f,0   // limitFrameRate.
+        WriteLine f,1       // musicEnabled.
+        WriteLine f,1       // soundEnabled.
+        WriteLine f,3       // musicBarAmount.
+        WriteLine f,5       // soundBarAmount.
+        WriteLine f,0       // vsyncSetting.
+        WriteLine f,0       // limitFrameRateIndex.
         
         For i=1 To 3
-            WriteLine f,i // craftKeybind.
+            WriteLine f,i   // craftKeybind.
         Next i
         
         For i=1 To 3
-            WriteLine f,i // craftGamepad.
+            WriteLine f,i   // craftGamepad.
         Next i
  
     CloseFile f

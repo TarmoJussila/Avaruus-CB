@@ -573,28 +573,16 @@ Menu:
         If soundEnabled=True Then DrawImageBox menu_bar, posX+764, posY+352, 0, 0, soundBarAmount * 17, 24
         soundVolume = (soundBarAmount*100)/5
         
-        // Set vsync setting.
-        If BoxOverlap(posX+745,posY+430,124,79,mx,my,1,1)
-            DrawImage menu_selection,posX+841,posY+481
-            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then vsyncSetting = Not vsyncSetting
-        EndIf
-        DrawObject(menu_txt_vsync,posX+807,posY+477,vsyncSetting)
-        
-        // Limit frame rate setting not changed by default.
-        limitFrameRateSettingChanged=False
-        
         // Get current settings.
         settingActive(1) = musicEnabled
         settingActive(2) = soundEnabled
-        settingActive(3) = limitFrameRate
         
-        // Toggle music, sound and vsync settings.
-        For i = 1 To 3
+        // Toggle music and sound settings.
+        For i = 1 To 2
             If BoxOverlap(posX+895,posY+222+(i-1)*110,54,54,mx,my,1,1)
                 DrawImage menu_item_select,posX+891,posY+218+(i-1)*110
                 If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then 
                     settingActive(i)=Not settingActive(i)
-                    If i=3 Then limitFrameRateSettingChanged=True // Limit frame rate setting changed.
                 EndIf
             EndIf
             DrawObject(menu_on_off,posX+922,posY+249+((i-1)*110),settingActive(i))
@@ -603,30 +591,62 @@ Menu:
         // Set new current settings.
         musicEnabled = settingActive(1)
         soundEnabled = settingActive(2)
-        limitFrameRate = settingActive(3)
+
+        // Limit frame rate setting not changed by default.
+        limitFrameRateSettingChanged=False
+        
+        // Set frame rate settings.
+        If BoxOverlap(posX+895,posY+442,54,54,mx,my,1,1)
+            DrawImage menu_item_select,posX+891,posY+438
+            DrawImage menu_fps_limit,posX+742,posY+427
+            SetFont font_small : Color 192,192,192 : CenterText 807+posX,499+posY,FPS(),2 // Display FPS.
+            If (MouseHit(1) Or isInputHit=True) And keyDelay=0 Then
+                limitFrameRateIndex=limitFrameRateIndex+1
+                limitFrameRateSettingChanged=True // Limit frame rate setting changed.
+            ElseIf MouseHit(2) And keyDelay=0 Then
+                limitFrameRateIndex=limitFrameRateIndex-1
+                limitFrameRateSettingChanged=True // Limit frame rate setting changed.
+            EndIf
+        Else
+            DrawImage menu_vsync,posX+742,posY+427
+            DrawObject(menu_txt_vsync,posX+807,posY+477,vsyncSetting)
+        EndIf 
+        
+        // Set vsync setting.
+        If BoxOverlap(posX+745,posY+430,124,79,mx,my,1,1)
+            DrawImage menu_selection,posX+841,posY+481
+            If (MouseHit(1) Or MouseHit(2) Or isInputHit=True) And keyDelay=0 Then vsyncSetting = Not vsyncSetting
+        EndIf
+        
+        If limitFrameRateIndex>limitFrameRateIndexMax Then limitFrameRateIndex=0
+        If limitFrameRateIndex<0 Then limitFrameRateIndex=limitFrameRateIndexMax
         
         // Apply limit frame rate setting if changed.
         If limitFrameRateSettingChanged=True Then
-            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            frameRateValue = frameRateOptions(limitFrameRateIndex)
+            If frameRateValue<0 Or frameRateValue=OFF Then
+                limitFrameRate=False
+            Else
+                limitFrameRate=True
+            EndIf
+
             If limitFrameRate=True Then
-                If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-                    If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
-                    If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
-                    If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+                If frameRateValue<0 Or frameRateValue=OFF Then
+                    FrameLimit OFF
                 Else
-                    If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+                    FrameLimit frameRateValue
                 EndIf
             Else
-                If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-                    If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
-                    If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
-                    If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
-                Else
-                    If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
-                EndIf
+                FrameLimit OFF
             EndIf
-            // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             limitFrameRateSettingChanged=False
+        EndIf
+        
+        // Display current frame rate settings.
+        If limitFrameRate=False Then
+            DrawObject(menu_on_off,posX+922,posY+469,0)
+        Else
+            DrawDigit(frameRateValue,posX+922,posY+469,digits_medium,2,14)
         EndIf
         
         // Back button.
@@ -844,7 +864,7 @@ SaveSettings:
         WriteLine f,musicBarAmount
         WriteLine f,soundBarAmount
         WriteLine f,vsyncSetting
-        WriteLine f,limitFrameRate
+        WriteLine f,limitFrameRateIndex
         
         For i=1 To 3
             WriteLine f,craftKeybind(i)

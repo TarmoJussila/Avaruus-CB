@@ -10,19 +10,15 @@ Dim showLauncher : showLauncher         = True          // Show launcher at star
 Dim windowFullscreen : windowFullscreen = False         // Fullscreen setting: TRUE = Window fullscreen, FALSE = Exclusive fullscreen.
 Dim vsyncSetting : vsyncSetting         = 0             // Vsync setting: 0 = CPU, 1 = GPU.
 Dim colorDepth : colorDepth             = 32            // Color depth = 0 (Automatic), 16, 24 or 32.
-Dim limitFrameRate : limitFrameRate     = False         // Limit frame rate: TRUE = Limit to 60FPS, FALSE = Limit to 72FPS.
-Dim doubleFrameRate : doubleFrameRate   = False         // Double frame rate: Limit to 120FPS or 144FPS depending on limit frame rate setting.
-Dim forceFrameRate : forceFrameRate     = False         // Force frame rate setting. TRUE = Force 30/40/50 frame rate. FALSE = No override.
-Dim forceFrameRate30 : forceFrameRate30 = False         // Force frame rate 30: Force 30FPS or 36FPS depending on 'limitFrameRate' setting.
-Dim forceFrameRate40 : forceFrameRate40 = False         // Force frame rate 40: Force 40FPS or 48FPS depending on 'limitFrameRate' setting.
-Dim forceFrameRate50 : forceFrameRate50 = False         // Force frame rate 50: Force 50FPS or 59FPS depending on 'limitFrameRate' setting.
+Dim limitFrameRate : limitFrameRate     = False         // Limit frame rate: TRUE = Limit to selected value, FALSE = Frame limit OFF.
+Dim frameRateValue : frameRateValue     = 60            // Used as a frame limit value if limit frame rate is enabled.
 Dim showFPS : showFPS                   = False         // Show FPS.
 Dim gamepadSupport : gamepadSupport     = True          // Enable gamepad support.
 Dim showTrackName : showTrackName       = True          // Show track name on change.
 Dim devMode : devMode                   = 0             // Developer mode: 0 = Off, 1 = Developer mode, 2 = Debug mode.
 Dim majorVersion : majorVersion         = 1             // Major version digit.
 Dim minorVersion : minorVersion         = 3             // Minor version digit.
-Dim buildVersion : buildVersion         = 230105        // Build version 'YYMMDD'.
+Dim buildVersion : buildVersion         = 230108        // Build version 'YYMMDD'.
 Dim shortVersion As String : shortVersion = (majorVersion + "." + minorVersion)
 Dim completeVersion As String : completeVersion = (majorVersion + "." + minorVersion + "-" + buildVersion)
 
@@ -36,21 +32,13 @@ StartAvaruusGame: // GOTO: Start game point after launcher.
 // Initialize frame limit.
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 If limitFrameRate=True Then
-    If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-        If forceFrameRate30=True Then FrameLimit 30 // 30Hz = 30FPS.
-        If forceFrameRate40=True Then FrameLimit 40 // 40Hz = 40FPS.
-        If forceFrameRate50=True Then FrameLimit 50 // 50Hz = 50FPS.
+    If frameRateValue<0 Or frameRateValue=OFF Then
+        FrameLimit OFF
     Else
-        If doubleFrameRate=False Then FrameLimit 60 Else FrameLimit 120 // Limit frame rate to 60FPS (or 120FPS in double mode).
+        FrameLimit frameRateValue
     EndIf
 Else
-    If forceFrameRate=True Then // Only checked if force frame rate setting on. Ignored by default.
-        If forceFrameRate30=True Then FrameLimit 36 // 36Hz = 36FPS.
-        If forceFrameRate40=True Then FrameLimit 48 // 48Hz = 48FPS.
-        If forceFrameRate50=True Then FrameLimit 59 // 59Hz = 59FPS.
-    Else
-        If doubleFrameRate=False Then FrameLimit 72 Else FrameLimit 144 // Limit frame rate to 72FPS (or 144FPS in double mode).
-    EndIf
+    FrameLimit OFF
 EndIf
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

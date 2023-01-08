@@ -464,27 +464,8 @@ GetCommandLineConfiguration:
         EndIf
         
         // Check and set frame limit mode.
-        If InStr(commandLineContent,"vsync")>0 Or InStr(commandLineContent,"frame")>0 Then // Find if command contains word 'vsync' or 'frame' and set frame limit ON.
-            limitFrameRate=True
-        EndIf
-        
-        // Check and set double frame rate mode.
-        If InStr(commandLineContent,"double")>0 Or InStr(commandLineContent,"speed")>0 Then // Find if command contains word 'double' or 'speed' and set double frame rate ON.
-            doubleFrameRate=True
-        EndIf
-        
-        // Check frame rate override settings only if double frame rate not on.
-        If doubleFrameRate=False Then
-            // Check and set 30Hz/36Hz mode.
-            If InStr(commandLineContent,"30hz")>0 Or InStr(commandLineContent,"36hz")>0 Then // Find if command contains word '30hz' or '36hz' and set frame limit to this.
-                forceFrameRate=True : forceFrameRate30=True
-            // Check and set 40Hz/48Hz mode.
-            ElseIf InStr(commandLineContent,"40hz")>0 Or InStr(commandLineContent,"48hz")>0 Then // Find if command contains word '40hz' or '48hz' and set frame limit to this.
-                forceFrameRate=True : forceFrameRate40=True
-            // Check and set 50Hz/59Hz mode.
-            ElseIf InStr(commandLineContent,"50hz")>0 Or InStr(commandLineContent,"59hz")>0 Then // Find if command contains word '50hz' or '59hz' and set frame limit to this.
-                forceFrameRate=True : forceFrameRate50=True
-            EndIf
+        If InStr(commandLineContent,"frame")>0 Then // Find if command contains word 'vsync' or 'frame' and set frame limit ON.
+            limitFrameRate=Not limitFrameRate
         EndIf
         
         // Check and set vsync mode to CPU.
@@ -504,7 +485,7 @@ GetCommandLineConfiguration:
         
         // Check and set FPS mode.
         If InStr(commandLineContent,"fps")>0 Then // Find if command contains word 'fps' and set FPS mode ON.
-            showFps=True
+            showFPS=True
         EndIf
         
         // Check and set developer mode.

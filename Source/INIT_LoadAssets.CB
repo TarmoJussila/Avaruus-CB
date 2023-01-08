@@ -50,6 +50,8 @@ menu_items          = LoadAnimImage ("Data\Gfx\menu_items.png"          ,72,64,0
 menu_slash          = LoadImage     ("Data\Gfx\menu_slash.png")
 menu_on_off         = LoadAnimImage ("Data\Gfx\menu_on_off.png"         ,42,14,0,2)
 menu_txt_vsync      = LoadAnimImage ("Data\Gfx\menu_txt_vsync.png"      ,84,26,0,2)
+menu_vsync          = LoadImage     ("Data\Gfx\menu_vsync.png")
+menu_fps_limit      = LoadImage     ("Data\Gfx\menu_fps_limit.png")
 menu_stats_enemy    = LoadImage     ("Data\Gfx\menu_stats_enemy.png")
 
 menu_current_round  = LoadImage     ("Data\Gfx\menu_current_round.png")
