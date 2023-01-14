@@ -210,21 +210,12 @@ EndFunction
 // =====================================================================================================================================================================================================
 // Constant game speed.
 // =====================================================================================================================================================================================================
-// Set game speed constant.
-Global g_frameTime As Float
-g_frameTime = 0.0
-
-Global g_tmpTime As Integer
-g_tmpTime = 0
-
-Global curTime
-
 // Return movement / pixel per second.
 Function PxPerSec(px#)
     Return px# * g_frameTime
 End Function
 
-// Return degree / degree per seocnd.
+// Return degree / degree per second.
 Function DgrPerSec(dgr#)
     Return dgr# * g_frameTime
 End Function
@@ -236,10 +227,10 @@ End Function
 
 // Update the frame timer.
 Function UpdateFrameTimer()
-    curTime = Timer()
-    If g_tmpTime = 0 Then g_tmpTime = curTime
-    g_frameTime = (curTime - g_tmpTime) / 1000.0
-    g_tmpTime = curTime
+    currentTime = Timer()
+    If g_tmpTime = 0 Then g_tmpTime = currentTime
+    g_frameTime = (currentTime - g_tmpTime) / 1000.0
+    g_tmpTime = currentTime
 End Function
 
 // =====================================================================================================================================================================================================

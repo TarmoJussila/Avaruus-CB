@@ -24,6 +24,13 @@ Dim limitFrameRateIndexMax : limitFrameRateIndexMax = 5
 Dim limitFrameRateIndex : limitFrameRateIndex = 0
 If limitFrameRate=True Then limitFrameRateIndex = 1
 
+// Set game speed constant.
+Global g_frameTime As Float : g_frameTime = 0.0
+Global g_tmpTime As Integer : g_tmpTime = 0
+Global currentTime As Integer
+Global fixedTimestep As Float : fixedTimestep = (1.0/60.0)
+Global accumulatedTime As Float : accumulatedTime = 0.0
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Menu and setting variables.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -111,7 +118,7 @@ Dim craftAlive(playerAmount)
 Dim craftKeybind(playerAmount)
 Dim craftGamepad(playerAmount)
 Dim craftCollisionTimer(playerAmount)
-Dim craftDamageTime(playerAmount)
+Dim craftDamageTime#(playerAmount)
 
 Dim craftFrictionX#(playerAmount)
 Dim craftFrictionY#(playerAmount)
@@ -146,6 +153,9 @@ Dim showItemName(playerAmount)
 Dim switchItem(playerAmount)
 Dim itemSwitchFrame(playerAmount)
 Dim explosionInactive(playerAmount)
+
+Dim thrustInput# : thrustInput# = 0.0
+Dim reverseInput# : reverseInput# = 0.0
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Item variables.

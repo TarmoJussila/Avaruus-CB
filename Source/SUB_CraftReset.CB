@@ -29,6 +29,8 @@ CraftReset:
     
         craftVelX(i) = 0 // Zero these before next round.
         craftVelY(i) = 0 // to avoid 'ghost' movement.
+        craftFrictionX(i) = 0
+        craftFrictionY(i) = 0
         
         ammoBiso(i)=0 : ammoShot(i)=0 : ammoMgun(i)=0 : ammoBazo(i)=0 : ammoSprd(i)=0 : ammoMine(i)=0
         

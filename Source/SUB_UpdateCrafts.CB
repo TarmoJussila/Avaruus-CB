@@ -165,17 +165,23 @@ UpdateCrafts:
                             reverseInput# = Max(KeyDown(craftReverseKey(i)), craftGamepadReverseKey(i))
                         EndIf
                         
-                        // Apply friction to craft.
-                        craftFrictionX(i) = craftVelX(i) * craftFriction(i)
-                        craftFrictionY(i) = craftVelY(i) * craftFriction(i)
+                        // Update friction at fixed time.
+                        accumulatedTime = accumulatedTime + FrameTime()
+                        If accumulatedTime > fixedTimestep Then
+                            // Apply friction to craft.
+                            craftFrictionX(i) = craftVelX(i) * craftFriction(i)
+                            craftFrictionY(i) = craftVelY(i) * craftFriction(i)
+                            // Update accumulated time.
+                            accumulatedTime = accumulatedTime - fixedTimestep
+                        EndIf
                         
                         // Apply all forces that affect craft.
                         craftVelX(i) = craftFrictionX(i) + craftThrust(i) *  Cos(craftAngle(i)) * (Float(thrustInput#)-Float(reverseInput#*0.5))
                         craftVelY(i) = craftFrictionY(i) - craftThrust(i) * -Sin(craftAngle(i)) * (Float(thrustInput#)-Float(reverseInput#*0.5))
                         
                         // Update craft position.
-                        craftX(i) = craftX(i) + PxPerSec(craftVelX(i)*craftSpeed(i))
-                        craftY(i) = craftY(i) + PxPerSec(craftVelY(i)*craftSpeed(i))
+                        craftX(i) = craftX(i) + craftVelX(i) * PxPerSec(craftSpeed(i))
+                        craftY(i) = craftY(i) + craftVelY(i) * PxPerSec(craftSpeed(i))
                         
                     EndIf
                     

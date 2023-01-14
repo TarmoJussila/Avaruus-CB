@@ -23,8 +23,8 @@ DevMode:
             updateFpsTimer = Timer()
         EndIf
         
-        If updateFps<1 Then updateFps=60
-        If updateFps>999 Then updateFps=60
+        If updateFps<1 Then updateFps=1
+        If updateFps>999 Then updateFps=999
         
         Text 2,2,"FPS: "+FPS()+" ("+updateFps+")" // Display FPS and secondary FPS.
         
