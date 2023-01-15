@@ -5,6 +5,9 @@ UpdateCrafts:
 
     If gameActive=True Then
 
+        // Update fixed timestep calculation.
+        accumulatedTime = accumulatedTime + FrameTime()
+
         // Display startup timer.
         haltMovement=False // Movement not halt by default.
         // During startup counter, display player names and halt movement.
@@ -30,38 +33,40 @@ UpdateCrafts:
                         If (i=j)=False Then
                             If craftArmor(i)>0 And craftArmor(j)>0 Then
                                 If Distance(craftX(i), craftY(i), craftX(j), craftY(j))<=40.0 Then
+
+                                    If accumulatedTime > fixedTimestep Then
+                                        // Get angle between colliding crafts.
+                                        angleBetweenPoints = GetAngle(craftX(i), craftY(i), craftX(j), craftY(j))
                                     
-                                    // Get angle between colliding crafts.
-                                    angleBetweenPoints = GetAngle(craftX(i), craftY(i), craftX(j), craftY(j))
-                                    
-                                    // Reduce current velocity.
-                                    craftVelX(i) = craftVelX(i)/3.0 // Reduce current X velocity.
-                                    craftVelY(i) = craftVelY(i)/3.0 // Reduce current Y velocity.
-                                    
-                                    // Get collision force based on current velocity.
-                                    collisionVelocity# = (Abs(craftVelX(i)) + Abs(craftVelY(i))) * 1.0
-                                    collisionForce# = Max(collisionVelocity#, 0.1)
-                                    
-                                    // Push the collider.
-                                    craftVelX(i) = craftVelX(i) - collisionForce# * Cos(angleBetweenPoints)
-                                    craftVelY(i) = craftVelY(i) + collisionForce# * Sin(angleBetweenPoints)
-                                    
-                                    // Push the collidee.
-                                    craftVelX(j) = craftVelX(j) + collisionForce# * Cos(angleBetweenPoints)
-                                    craftVelY(j) = craftVelY(j) - collisionForce# * Sin(angleBetweenPoints)
-                                    
-                                    // Reset craft collision timer.
-                                    craftCollisionTimer(i)=Timer()
-    
-                                    // Play sound effect.
-                                    If collisionSoundDelay=False Then
-                                        collisionSound=Rand(1,2) // Randomize which sound is played.
-                                        If collisionSound=1
-                                            PlaySound snd_collision_1,soundVolume,0,Rand(40000,48000)
-                                        ElseIf collisionSound=2
-                                            PlaySound snd_collision_2,soundVolume,0,Rand(40000,48000)
+                                        // Reduce current velocity.
+                                        craftVelX(i) = craftVelX(i)/3.0 // Reduce current X velocity.
+                                        craftVelY(i) = craftVelY(i)/3.0 // Reduce current Y velocity.
+                                        
+                                        // Get collision force based on current velocity.
+                                        collisionVelocity# = (Abs(craftVelX(i)) + Abs(craftVelY(i))) * 1.0
+                                        collisionForce# = Max(collisionVelocity#, 0.1)
+                                        
+                                        // Push the collider.
+                                        craftVelX(i) = craftVelX(i) - collisionForce# * Cos(angleBetweenPoints)
+                                        craftVelY(i) = craftVelY(i) + collisionForce# * Sin(angleBetweenPoints)
+                                        
+                                        // Push the collidee.
+                                        craftVelX(j) = craftVelX(j) + collisionForce# * Cos(angleBetweenPoints)
+                                        craftVelY(j) = craftVelY(j) - collisionForce# * Sin(angleBetweenPoints)
+
+                                        // Reset craft collision timer.
+                                        craftCollisionTimer(i)=Timer()
+
+                                        // Play sound effect.
+                                        If collisionSoundDelay=False Then
+                                            collisionSound=Rand(1,2) // Randomize which sound is played.
+                                            If collisionSound=1
+                                                PlaySound snd_collision_1,soundVolume,0,Rand(40000,48000)
+                                            ElseIf collisionSound=2
+                                                PlaySound snd_collision_2,soundVolume,0,Rand(40000,48000)
+                                            EndIf
+                                            collisionSoundDelay=True
                                         EndIf
-                                        collisionSoundDelay=True
                                     EndIf
                                     
                                 EndIf
@@ -164,15 +169,12 @@ UpdateCrafts:
                             thrustInput# = Max(KeyDown(craftThrustKey(i)), craftGamepadThrustKey(i))
                             reverseInput# = Max(KeyDown(craftReverseKey(i)), craftGamepadReverseKey(i))
                         EndIf
-                        
+
                         // Update friction at fixed time.
-                        accumulatedTime = accumulatedTime + FrameTime()
                         If accumulatedTime > fixedTimestep Then
                             // Apply friction to craft.
                             craftFrictionX(i) = craftVelX(i) * craftFriction(i)
                             craftFrictionY(i) = craftVelY(i) * craftFriction(i)
-                            // Update accumulated time.
-                            accumulatedTime = accumulatedTime - fixedTimestep
                         EndIf
                         
                         // Apply all forces that affect craft.
@@ -275,6 +277,11 @@ UpdateCrafts:
             EndIf
     
         Next i
+        
+        // Reset fixed timestep calculation.
+        If accumulatedTime > fixedTimestep Then
+            accumulatedTime = accumulatedTime - fixedTimestep
+        EndIf
     
     EndIf
     

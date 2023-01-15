@@ -88,8 +88,6 @@ Dim matchDuration
 
 Dim totalRoundsPlayed
 Dim totalPlayTime
-Dim totalShotsFired // TODO.
-Dim totalItemsUsed // TODO.
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Player variables.

@@ -346,21 +346,21 @@ RoundStats:
                     DrawObject(round_skull,posX+652,posY+163)   // P2: Skull.
                 ElseIf playerAmount=3 Then
                     DrawObject(round_trophy,posX+232,posY+163)  // P1: Trophy (winner).
-                    DrawObject(round_skull,posX+512,posY+163)   // P2: Skull. TODO.
-                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull. TODO.
+                    DrawObject(round_skull,posX+512,posY+163)   // P2: Skull.
+                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull.
                 EndIf
             ElseIf winner=2 Then
                 If playerAmount=2 Then
                     DrawObject(round_skull,posX+372,posY+163)   // P1: Skull.
                     DrawObject(round_trophy,posX+652,posY+163)  // P2: Trophy (winner).
                 ElseIf playerAmount=3 Then
-                    DrawObject(round_skull,posX+232,posY+163)   // P1: Skull. TODO.
+                    DrawObject(round_skull,posX+232,posY+163)   // P1: Skull.
                     DrawObject(round_trophy,posX+512,posY+163)  // P2: Trophy (winner).
-                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull. TODO.
+                    DrawObject(round_skull,posX+792,posY+163)   // P3: Skull.
                 EndIf
             ElseIf winner=3 Then
-                DrawObject(round_skull,posX+232,posY+163)       // P1: Skull. TODO.
-                DrawObject(round_skull,posX+512,posY+163)       // P2: Skull. TODO.
+                DrawObject(round_skull,posX+232,posY+163)       // P1: Skull.
+                DrawObject(round_skull,posX+512,posY+163)       // P2: Skull.
                 DrawObject(round_trophy,posX+792,posY+163)      // P3: Trophy (winner).
             EndIf
             
