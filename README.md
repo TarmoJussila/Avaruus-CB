@@ -37,6 +37,12 @@ The very first prototype version of the game ("H.I.P.P.4.") was
 released in 2006. Other major development sprints occurred in
 2008 and in 2011 but the game was never finalized until 2018.
 
+The 2006 version of the game participated in a Finnish game
+creation competition by CBCorner.net, placing 5th. The sequel
+released in 2008 took part in another game creation competition
+held by Pelisivut.org, placing 4th. The 2011 version was an
+overhaul of the original concept, and was initially unreleased.
+
 After nearly a decade of inactivity in the development the game
 was almost lost forever - but luckily it was recovered and could
 be released with some newly added features and fixes.
