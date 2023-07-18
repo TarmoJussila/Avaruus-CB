@@ -82,4 +82,6 @@ Code + Graphics = Tarmo Jussila
 
 Music + Sounds = Juhani Haverinen
 
+Special thanks = Joni Ruisaho
+
 See the LICENSE file for more information.
