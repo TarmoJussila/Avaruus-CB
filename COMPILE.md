@@ -12,6 +12,15 @@ PREREQUISITES
 - Download and install the CoolBasic game engine (see link
 above)
 
+CHECKING
+----------------------------------------------------------------
+
+To check the syntax of the source code you can run the check from inside the CoolBasic Editor.
+
+1. Open the "AVA_Main.CB" file in the CoolBasic Editor
+2. Check syntax with the "Check Syntax" menu button (or by
+pressing F4)
+
 RUNNING
 ----------------------------------------------------------------
 
@@ -19,8 +28,8 @@ To compile and run the game for testing purposes you can run it
 from inside the CoolBasic Editor.
 
 1. Open the "AVA_Main.CB" file in the CoolBasic Editor
-2. Compile and run with the "Compile and RUN" menu button (or
-by pressing F5)
+2. Compile and run with the "Compile and RUN" menu button (or by
+pressing F5)
 
 BUILDING
 ----------------------------------------------------------------
