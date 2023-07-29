@@ -1,7 +1,7 @@
 AVARUUS - COMPILE INSTRUCTIONS
 ----------------------------------------------------------------
 
-CoolBasic version 10.4.0 (from 2005) was used to create the
+CoolBasic version 10.43 (from 2005) was used to create the
 game. This version is still available for
 [download](https://www.coolbasic.com) from the CoolBasic
 website.
