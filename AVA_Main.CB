@@ -25,7 +25,7 @@ Dim completeVersion As String : completeVersion = (majorVersion + "." + minorVer
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Include launcher.
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Include "AVA_Launcher.CB"
+Include "AVA_Launcher.cb"
 StartAvaruusGame: // GOTO: Start game point after launcher.
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,18 +53,18 @@ ClsColor 0, 0, 0                                        // Set background color 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Include initial scripts.
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Include "Source/INIT_Variables.CB"
-Include "Source/INIT_LoadAssets.CB"
+Include "Source\INIT_Variables.cb"
+Include "Source\INIT_LoadAssets.cb"
 
-Include "Source/INIT_Gamepad.CB"
+Include "Source\INIT_Gamepad.cb"
 
-Include "Source/INIT_CheckSettings.CB"
-Include "Source/INIT_CheckMultiSettings.CB"
-Include "Source/INIT_CheckStatistics.CB"
+Include "Source\INIT_CheckSettings.cb"
+Include "Source\INIT_CheckMultiSettings.cb"
+Include "Source\INIT_CheckStatistics.cb"
 
-Include "Source/INIT_InvalidInputKeys.CB"
+Include "Source\INIT_InvalidInputKeys.cb"
 
-Include "Source/INIT_SeekMusicFiles.CB"
+Include "Source\INIT_SeekMusicFiles.cb"
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Run initial scripts and checks.
@@ -146,38 +146,38 @@ End
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Include sub programs.
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Include "Source/SUB_Menu.CB"
-Include "Source/SUB_InputPlayerName.CB"
-Include "Source/SUB_SetupControls.CB"
-Include "Source/SUB_UpdatePointerPosition.CB"
+Include "Source\SUB_Menu.cb"
+Include "Source\SUB_InputPlayerName.cb"
+Include "Source\SUB_SetupControls.cb"
+Include "Source\SUB_UpdatePointerPosition.cb"
 
-Include "Source/SUB_UpdateItems.CB"
-Include "Source/SUB_ItemPickup.CB"
-Include "Source/SUB_ItemUsage.CB"
-Include "Source/SUB_UpdateCrafts.CB"
-Include "Source/SUB_UpdateWeapons.CB"
-Include "Source/SUB_UpdateBullets.CB"
-Include "Source/SUB_CraftExplosion.CB"
-Include "Source/SUB_UpdateParticles.CB"
-Include "Source/SUB_UpdateCraftInfo.CB"
+Include "Source\SUB_UpdateItems.cb"
+Include "Source\SUB_ItemPickup.cb"
+Include "Source\SUB_ItemUsage.cb"
+Include "Source\SUB_UpdateCrafts.cb"
+Include "Source\SUB_UpdateWeapons.cb"
+Include "Source\SUB_UpdateBullets.cb"
+Include "Source\SUB_CraftExplosion.cb"
+Include "Source\SUB_UpdateParticles.cb"
+Include "Source\SUB_UpdateCraftInfo.cb"
 
-Include "Source/SUB_RoundStats.CB"
-Include "Source/SUB_GameReset.CB"
-Include "Source/SUB_CraftReset.CB"
+Include "Source\SUB_RoundStats.cb"
+Include "Source\SUB_GameReset.cb"
+Include "Source\SUB_CraftReset.cb"
 
-Include "Source/SUB_MenuPause.CB"
-Include "Source/SUB_UpdateRoundDuration.CB"
-Include "Source/SUB_MenuOverlay.CB"
+Include "Source\SUB_MenuPause.cb"
+Include "Source\SUB_UpdateRoundDuration.cb"
+Include "Source\SUB_MenuOverlay.cb"
 
-Include "Source/SUB_PlayMusicFiles.CB"
+Include "Source\SUB_PlayMusicFiles.cb"
 
-Include "Source/SUB_DevMode.CB"
-Include "Source/SUB_KeyboardShortcuts.CB"
+Include "Source\SUB_DevMode.cb"
+Include "Source\SUB_KeyboardShortcuts.cb"
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Include functions.
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Include "Source/FNC_Functions.CB"
-Include "Source/FNC_Gamepad.CB"
+Include "Source\FNC_Functions.cb"
+Include "Source\FNC_Gamepad.cb"
 
 // =====================================================================================================================================================================================================
